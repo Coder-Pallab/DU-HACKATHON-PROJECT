@@ -44,6 +44,7 @@ const careerSchema = new mongoose.Schema(
         'Sales & Marketing',
         'Business & Management',
         'Design & Creative',
+        'Education & Training',
         'Other',
       ],
       default: 'Technology',

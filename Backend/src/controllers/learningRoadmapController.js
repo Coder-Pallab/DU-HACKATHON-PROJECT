@@ -24,6 +24,11 @@ export const getLatestLearningRoadmap = asyncHandler(async (req, res) => {
   return ApiResponse.success(res, roadmap, 'Learning roadmap retrieved successfully');
 });
 
+export const listLearningRoadmaps = asyncHandler(async (req, res) => {
+  const roadmaps = await learningRoadmapService.getStudentLearningRoadmaps(req.user._id);
+  return ApiResponse.success(res, roadmaps, 'Learning roadmaps retrieved successfully');
+});
+
 export const updateRoadmapPhase = asyncHandler(async (req, res) => {
   const roadmap = await learningRoadmapService.updateRoadmapPhase(
     req.user._id,

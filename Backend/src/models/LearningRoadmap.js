@@ -97,6 +97,15 @@ const learningRoadmapSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    contentLanguage: {
+      type: String,
+      enum: ['English', 'Assamese'],
+    },
+    careerDescription: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+    },
     summary: {
       type: String,
       required: true,

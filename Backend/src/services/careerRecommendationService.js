@@ -5,6 +5,152 @@ import { ApiError } from '../utils/apiError.js';
 import { seedDefaultCareers } from './careerService.js';
 import { getMyProfile } from './studentService.js';
 import { generateStructuredJSON } from './geminiService.js';
+import {
+  containsAssameseText,
+  getContentLanguage,
+  getContentLanguageInstruction,
+} from './aiContentLanguage.js';
+
+const ASSAMESE_CAREER_TITLES = {
+  'Full Stack Developer': 'ফুল ষ্টেক ডেভেলপাৰ',
+  'Frontend Developer': 'ফ্ৰণ্টএণ্ড ডেভেলপাৰ',
+  'Backend Developer': 'বেকএণ্ড ডেভেলপাৰ',
+  'Data Analyst': 'ডাটা বিশ্লেষক',
+  'Data Scientist': 'ডাটা বিজ্ঞানী',
+  'AI/ML Engineer': 'AI/ML অভিযন্তা',
+  'Cloud Engineer': 'ক্লাউড অভিযন্তা',
+  'Cybersecurity Analyst': 'চাইবাৰ সুৰক্ষা বিশ্লেষক',
+  'UI/UX Designer': 'UI/UX ডিজাইনাৰ',
+  'Financial Analyst': 'বিত্তীয় বিশ্লেষক',
+  'Investment Banking Analyst': 'বিনিয়োগ বেংকিং বিশ্লেষক',
+  Accountant: 'একাউণ্টেণ্ট',
+  Teacher: 'শিক্ষক',
+  'Tech Sales & Business Development Representative':
+    'প্ৰযুক্তি বিক্ৰী আৰু ব্যৱসায় বিকাশ প্ৰতিনিধি',
+  'Digital Marketing Specialist': 'ডিজিটেল মাৰ্কেটিং বিশেষজ্ঞ',
+  'Business Analyst': 'ব্যৱসায় বিশ্লেষক',
+  'Product Manager': 'প্ৰডাক্ট মেনেজাৰ',
+};
+
+const ASSAMESE_SECTORS = {
+  Technology: 'প্ৰযুক্তি',
+  'Finance & Banking': 'বিত্ত আৰু বেংকিং',
+  'Education & Training': 'শিক্ষা আৰু প্ৰশিক্ষণ',
+  'Sales & Marketing': 'বিক্ৰী আৰু মাৰ্কেটিং',
+  'Business & Management': 'ব্যৱসায় আৰু ব্যৱস্থাপনা',
+  'Design & Creative': 'ডিজাইন আৰু সৃষ্টিশীলতা',
+};
+
+export const getFallbackLocalizedContent = (recommendation, language) => {
+  if (language !== 'Assamese') {
+    return {
+      localizedCareerTitle: recommendation.careerTitle,
+      localizedSector: recommendation.sector,
+      localizedCareerDescription: recommendation.careerDescription,
+      localizedCareerFitSummary: recommendation.careerFitSummary,
+      localizedRequiredQualifications: recommendation.requiredQualifications,
+      localizedSuggestedNextSteps: recommendation.suggestedNextSteps,
+    };
+  }
+
+  const careerTitle =
+    ASSAMESE_CAREER_TITLES[recommendation.careerTitle] || recommendation.careerTitle;
+  const missingSkills = recommendation.missingSkills.slice(0, 3);
+  const skillList = missingSkills.length > 0 ? missingSkills.join(', ') : 'নতুন দক্ষতা';
+  return {
+    localizedCareerTitle: careerTitle,
+    localizedSector: ASSAMESE_SECTORS[recommendation.sector] || 'কৰ্মক্ষেত্ৰ',
+    localizedCareerDescription: `${careerTitle} হিচাপে এই কেৰিয়াৰত পেছাগত দায়িত্ব পালন আৰু প্ৰয়োজনীয় দক্ষতা বিকাশত মনোযোগ দিয়া হয়।`,
+    localizedCareerFitSummary: `আপোনাৰ শিক্ষা, দক্ষতা আৰু আগ্ৰহৰ সৈতে এই কেৰিয়াৰৰ মিল আছে। ${skillList} শিকিলে এই ক্ষেত্ৰৰ বাবে আপোনাৰ প্ৰস্তুতি অধিক শক্তিশালী হ'ব।`,
+    localizedRequiredQualifications: [
+      'এই কেৰিয়াৰৰ অৰ্হতা আৰু প্ৰমাণপত্ৰ নিয়োগকৰ্তা অনুসৰি ভিন্ন হ’ব পাৰে।',
+    ],
+    localizedSuggestedNextSteps: [
+      `${skillList} শিকিবলৈ এটা ব্যৱহাৰিক অধ্যয়ন পৰিকল্পনা তৈয়াৰ কৰক।`,
+      `এই ক্ষেত্ৰৰ বাস্তৱ কামৰ সৈতে মিল থকা এটা প্ৰকল্প সম্পূৰ্ণ কৰক।`,
+      'আপোনাৰ প্ৰকল্প আৰু দক্ষতাসমূহেৰে এটা পেছাগত portfolio তৈয়াৰ কৰক।',
+    ],
+  };
+};
+
+export const hasValidLocalizedContent = (item, language) => {
+  const requiredText = [
+    item.localizedCareerTitle,
+    item.localizedSector,
+    item.localizedCareerDescription,
+    item.localizedCareerFitSummary,
+  ];
+  const requiredLists = [
+    item.localizedRequiredQualifications,
+    item.localizedSuggestedNextSteps,
+  ];
+
+  if (
+    requiredText.some((value) => typeof value !== 'string' || value.trim().length === 0) ||
+    requiredLists.some(
+      (value) =>
+        !Array.isArray(value) ||
+        value.length === 0 ||
+        value.some((entry) => typeof entry !== 'string' || !entry.trim())
+    )
+  ) {
+    return false;
+  }
+
+  if (language === 'Assamese') {
+    return [...requiredText, ...requiredLists.flat()].every(containsAssameseText);
+  }
+  return true;
+};
+
+const INTEREST_GROUPS = [
+  {
+    sector: 'Education & Training',
+    keywords: ['teacher', 'teaching', 'educator', 'education', 'tutor', 'tutoring', 'lecturer', 'professor'],
+  },
+  {
+    sector: 'Finance & Banking',
+    keywords: ['accountant', 'accounting', 'accounts', 'bookkeeper', 'bookkeeping', 'auditor', 'audit', 'finance', 'banking'],
+  },
+];
+
+export const getInterestScore = (interests, career) => {
+  const careerTitle = career.title.toLowerCase();
+  const careerSector = (career.sector || '').toLowerCase();
+  let score = 35;
+
+  for (const rawInterest of interests) {
+    const interest = rawInterest.trim().toLowerCase();
+    if (interest.length < 3) continue;
+
+    if (
+      interest === careerTitle ||
+      careerTitle.includes(interest) ||
+      interest.includes(careerTitle)
+    ) {
+      return 100;
+    }
+
+    const matchingGroup = INTEREST_GROUPS.find(({ keywords }) =>
+      keywords.some((keyword) => interest.includes(keyword) || keyword.includes(interest))
+    );
+    if (matchingGroup && careerSector === matchingGroup.sector.toLowerCase()) {
+      score = Math.max(score, 90);
+    }
+
+    if (careerSector.includes(interest) || interest.includes(careerSector)) {
+      score = Math.max(score, 90);
+    }
+
+    const careerWords = careerTitle.split(' ');
+    const interestWords = interest.split(' ');
+    if (careerWords.some((word) => word.length > 2 && interestWords.includes(word))) {
+      score = Math.max(score, 75);
+    }
+  }
+
+  return score;
+};
 
 /**
  * Fuzzy check if a student skill matches a required career skill
@@ -93,6 +239,12 @@ const evaluateEducationForSector = (student, sector = 'Technology') => {
     );
     if (isDesignEdu) baseScore = 90;
     else baseScore = 75;
+  } else if (sector === 'Education & Training') {
+    const isEducationEdu = ['education', 'teaching', 'pedagogy', 'b.ed', 'teacher training'].some(
+      (field) => degree.includes(field) || dept.includes(field)
+    );
+    if (isEducationEdu) baseScore = 90;
+    else if (degree || dept) baseScore = 80;
   } else {
     // Technology
     const isStemDegree = ['b.tech', 'btech', 'b.e', 'be', 'bca', 'mca', 'm.tech', 'b.sc', 'm.sc'].some((d) =>
@@ -173,46 +325,17 @@ export const calculateCareerMatch = (student, career) => {
 
   const softSkillScore = requiredSoft.length > 0 ? (matchedSoftCount / requiredSoft.length) * 100 : 70;
 
-  // 3. Career Interest & Sector Alignment (Weight: 20%)
-  const careerTitleLower = career.title.toLowerCase();
-  const careerSectorLower = (career.sector || '').toLowerCase();
-  let interestScore = 35; // Baseline if not explicitly listed
-
-  for (const interest of interests) {
-    // Direct career title match
-    if (interest === careerTitleLower || careerTitleLower.includes(interest) || interest.includes(careerTitleLower)) {
-      interestScore = 100;
-      break;
-    }
-
-    // Direct sector match (e.g. interest is 'Finance' and career is in 'Finance & Banking')
-    if (careerSectorLower.includes(interest) || interest.includes('finance') && careerSectorLower.includes('finance')) {
-      interestScore = Math.max(interestScore, 90);
-    } else if (interest.includes('sales') && careerSectorLower.includes('sales')) {
-      interestScore = Math.max(interestScore, 90);
-    } else if (interest.includes('marketing') && careerSectorLower.includes('marketing')) {
-      interestScore = Math.max(interestScore, 90);
-    } else if (interest.includes('management') && careerSectorLower.includes('management')) {
-      interestScore = Math.max(interestScore, 90);
-    }
-
-    // Partial keyword matches
-    const careerWords = careerTitleLower.split(' ');
-    const interestWords = interest.split(' ');
-    const hasOverlap = careerWords.some((w) => w.length > 2 && interestWords.includes(w));
-    if (hasOverlap) {
-      interestScore = Math.max(interestScore, 75);
-    }
-  }
+  // Explicit career interests should weigh as heavily as demonstrated technical fit.
+  const interestScore = getInterestScore(interests, career);
 
   // 4. Sector-Aware Education Scoring (Weight: 15%)
   const educationScore = evaluateEducationForSector(student, career.sector);
 
-  // 5. Final Composite Weighted Match Calculation (Deterministic & Non-Random)
+  // 5. Final composite weighted match calculation (deterministic and non-random)
   const compositeScore =
-    0.50 * technicalScore +
-    0.15 * softSkillScore +
-    0.20 * interestScore +
+    0.25 * technicalScore +
+    0.10 * softSkillScore +
+    0.50 * interestScore +
     0.15 * educationScore;
 
   // Clamp safely between 5% and 98%
@@ -254,54 +377,56 @@ export const calculateCareerMatch = (student, career) => {
  * @param {Array} topRecommendations 
  * @returns {Promise<Array|null>}
  */
-const enrichWithGeminiAI = async (student, topRecommendations) => {
-  const prompt = `
-You are a senior university career placement counsellor advising university students across diverse disciplines (Engineering, Commerce, Management, Humanities).
-Analyze this student's university profile and our matching engine's top career recommendations:
+export const buildCareerRecommendationsPrompt = (student, recommendations, language) => `
+You are a senior university career placement counsellor advising students across disciplines.
+${getContentLanguageInstruction(language)}
+Analyze this student's profile and all supplied career recommendations. Return one JSON object per supplied career.
 
-Student Profile:
-- Full Name: ${student.fullName}
+Student profile:
 - Degree: ${student.degree || 'Not specified'}
 - Department: ${student.department || 'Not specified'}
-- College: ${student.college || 'Not specified'}
 - CGPA: ${student.cgpa || 'Not specified'}
-- Existing Skills: ${JSON.stringify((student.technicalSkills || []).map((s) => `${s.name} (${s.proficiency})`))}
-- Soft Skills: ${JSON.stringify(student.softSkills || [])}
-- Target Career Interests: ${JSON.stringify(student.careerInterests || [])}
+- Existing skills: ${JSON.stringify((student.technicalSkills || []).map((s) => `${s.name} (${s.proficiency})`))}
+- Soft skills: ${JSON.stringify(student.softSkills || [])}
+- Career interests: ${JSON.stringify(student.careerInterests || [])}
 
-Top Recommended Careers:
+Careers:
 ${JSON.stringify(
-  topRecommendations.map((r) => ({
+  recommendations.map((r) => ({
     careerTitle: r.careerTitle,
     sector: r.sector,
-    matchPercentage: `${r.matchPercentage}%`,
+    careerDescription: r.careerDescription,
+    careerFitSummary: r.careerFitSummary,
     matchingSkills: r.matchingSkills,
     missingSkills: r.missingSkills,
+    requiredQualifications: r.requiredQualifications,
+    suggestedNextSteps: r.suggestedNextSteps,
   }))
 )}
 
-For each recommended career, generate customized career counselling advice:
-1. "careerTitle": Exact career title from above
-2. "careerFitSummary": 2 sentences explaining why this student's specific academic background and skill set makes them a strong contender in this sector.
-3. "aiNextSteps": Array of 3 concrete, personalized action items (e.g. project to build, certification, or industry prep milestone tailored to their sector).
-
-Return a valid JSON array of objects conforming to this schema.
+Return exactly these keys for each supplied career:
+- "careerTitle": exact unchanged title from the input, used for matching.
+- "localizedCareerTitle": natural career title in the selected language.
+- "localizedSector": natural sector translation.
+- "localizedCareerDescription": concise natural career description.
+- "localizedCareerFitSummary": two personalized sentences explaining fit and improvement areas.
+- "localizedRequiredQualifications": translated qualification array; preserve official degree and certificate names where appropriate.
+- "localizedSuggestedNextSteps": three concrete personalized actions.
+Keep technical skill names, programming languages, frameworks, official certificates, identifiers, and machine-readable values unchanged where appropriate.
+Return only a valid JSON array. Do not translate property names, IDs, numeric values, or matching skills.
 `;
 
+const enrichWithGeminiAI = async (student, recommendations, language) => {
   try {
     const aiResult = await generateStructuredJSON(
-      prompt,
-      'You are an expert career counselling AI that outputs strictly valid JSON arrays of recommendations.'
+      buildCareerRecommendationsPrompt(student, recommendations, language),
+      'You are an expert multilingual career counselling AI that outputs strictly valid JSON arrays.'
     );
-
-    if (Array.isArray(aiResult) && aiResult.length > 0) {
-      return aiResult;
-    }
+    return Array.isArray(aiResult) ? aiResult : null;
   } catch (err) {
     console.warn(`[Gemini AI] Career enrichment skipped: ${err.message}`);
+    return null;
   }
-
-  return null;
 };
 
 /**
@@ -314,6 +439,7 @@ export const generateCareerRecommendations = async (userId) => {
   await seedDefaultCareers();
 
   const student = await getMyProfile(userId);
+  const contentLanguage = getContentLanguage(student);
   const careers = await Career.find({ isActive: true });
 
   if (careers.length === 0) {
@@ -323,25 +449,32 @@ export const generateCareerRecommendations = async (userId) => {
   // Compute deterministic match for every career across all sectors
   const recommendations = careers
     .map((career) => calculateCareerMatch(student, career))
-    .sort((a, b) => b.matchPercentage - a.matchPercentage);
+    .sort((a, b) => b.matchPercentage - a.matchPercentage)
+    .map((recommendation) => ({
+      ...recommendation,
+      ...getFallbackLocalizedContent(recommendation, contentLanguage),
+    }));
 
-  // Invoke Google Gemini AI to enrich the top 3 recommendations
+  // Translate descriptive fields while preserving canonical titles and match data.
   let isAIEnriched = false;
-  const aiEnrichments = await enrichWithGeminiAI(student, recommendations.slice(0, 3));
+  const aiEnrichments = await enrichWithGeminiAI(student, recommendations, contentLanguage);
 
-  if (aiEnrichments && Array.isArray(aiEnrichments)) {
-    isAIEnriched = true;
+  if (aiEnrichments) {
     for (const enrichment of aiEnrichments) {
       const target = recommendations.find(
-        (r) => r.careerTitle.toLowerCase() === enrichment.careerTitle?.toLowerCase()
+        (recommendation) =>
+          recommendation.careerTitle.toLowerCase() === enrichment?.careerTitle?.toLowerCase()
       );
-      if (target) {
-        if (enrichment.careerFitSummary) {
-          target.careerFitSummary = enrichment.careerFitSummary;
-        }
-        if (Array.isArray(enrichment.aiNextSteps) && enrichment.aiNextSteps.length > 0) {
-          target.suggestedNextSteps = enrichment.aiNextSteps;
-        }
+      if (target && hasValidLocalizedContent(enrichment, contentLanguage)) {
+        Object.assign(target, {
+          localizedCareerTitle: enrichment.localizedCareerTitle,
+          localizedSector: enrichment.localizedSector,
+          localizedCareerDescription: enrichment.localizedCareerDescription,
+          localizedCareerFitSummary: enrichment.localizedCareerFitSummary,
+          localizedRequiredQualifications: enrichment.localizedRequiredQualifications,
+          localizedSuggestedNextSteps: enrichment.localizedSuggestedNextSteps,
+        });
+        isAIEnriched = true;
       }
     }
   }
@@ -354,12 +487,14 @@ export const generateCareerRecommendations = async (userId) => {
       student: student._id,
       user: userId,
       recommendations,
+      contentLanguage,
       isAIEnriched,
       lastAnalyzedAt: new Date(),
       version: 1,
     });
   } else {
     recommendationRecord.recommendations = recommendations;
+    recommendationRecord.contentLanguage = contentLanguage;
     recommendationRecord.isAIEnriched = isAIEnriched;
     recommendationRecord.lastAnalyzedAt = new Date();
     recommendationRecord.version = (recommendationRecord.version || 1) + 1;
@@ -371,6 +506,7 @@ export const generateCareerRecommendations = async (userId) => {
     studentId: student._id,
     fullName: student.fullName,
     isAIEnriched,
+    contentLanguage,
     lastAnalyzedAt: recommendationRecord.lastAnalyzedAt,
     version: recommendationRecord.version,
     totalEvaluated: recommendations.length,
@@ -385,11 +521,16 @@ export const generateCareerRecommendations = async (userId) => {
  */
 export const getStudentRecommendations = async (userId) => {
   const student = await getMyProfile(userId);
+  const contentLanguage = getContentLanguage(student);
 
   let record = await CareerRecommendation.findOne({ student: student._id })
     .populate('recommendations.career', 'title slug sector industryDemand averageSalaryRange');
 
-  if (!record || record.recommendations.length === 0) {
+  if (
+    !record ||
+    record.recommendations.length === 0 ||
+    record.contentLanguage !== contentLanguage
+  ) {
     return await generateCareerRecommendations(userId);
   }
 
@@ -397,6 +538,7 @@ export const getStudentRecommendations = async (userId) => {
     studentId: student._id,
     fullName: student.fullName,
     isAIEnriched: record.isAIEnriched || false,
+    contentLanguage: record.contentLanguage,
     lastAnalyzedAt: record.lastAnalyzedAt,
     version: record.version,
     totalEvaluated: record.recommendations.length,

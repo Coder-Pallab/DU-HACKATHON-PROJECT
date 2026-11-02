@@ -60,6 +60,10 @@ const skillGapAnalysisSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    contentLanguage: {
+      type: String,
+      enum: ['English', 'Assamese'],
+    },
     matchPercentage: {
       type: Number,
       required: true,

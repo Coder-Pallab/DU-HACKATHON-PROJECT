@@ -2,7 +2,16 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import express from 'express';
 import app from '../src/app.js';
-import { buildSkillGapResult } from '../src/services/skillGapService.js';
+import {
+  buildSkillGapPrompt,
+  buildSkillGapResult,
+  createFallbackSummary,
+} from '../src/services/skillGapService.js';
+import {
+  getContentLanguage,
+  getContentLanguageInstruction,
+} from '../src/services/aiContentLanguage.js';
+import SkillGapAnalysis from '../src/models/SkillGapAnalysis.js';
 import { validateSkillGapRequest } from '../src/validators/skillGapValidator.js';
 
 let server;
@@ -91,6 +100,65 @@ test('returns no gaps when every required technical and soft skill is present', 
   );
 
   assert.deepEqual(result.missingSkills, []);
+});
+
+test('uses the saved Assamese preference and keeps fallback skill-gap guidance Assamese', () => {
+  const student = {
+    preferredLanguage: 'Assamese',
+    technicalSkills: [],
+    softSkills: [],
+    careerInterests: [],
+    degree: '',
+    department: '',
+    cgpa: 0,
+  };
+  const career = {
+    title: 'Frontend Developer',
+    sector: 'Technology',
+    requiredTechnicalSkills: [{ name: 'React', importance: 'Core', weight: 2 }],
+    requiredSoftSkills: [],
+    requiredQualifications: [],
+  };
+  const result = buildSkillGapResult(student, career, getContentLanguage(student));
+  const assameseText = [
+    createFallbackSummary(career.title, 0, result.missingSkills.length, 'Assamese'),
+    ...result.missingSkills.flatMap((gap) => gap.learningSteps),
+  ].join(' ');
+
+  assert.match(getContentLanguageInstruction('Assamese'), /natural, fluent Assamese/);
+  assert.match(
+    buildSkillGapPrompt(student, career, result.missingSkills, 'Assamese'),
+    /Generate all explanatory content in natural, fluent Assamese \(অসমীয়া\)/
+  );
+  assert.match(
+    buildSkillGapPrompt(student, career, result.missingSkills, 'English'),
+    /Generate all content in clear, professional English/
+  );
+  assert.match(assameseText, /[\u0980-\u09FF]/u);
+  assert.doesNotMatch(assameseText, /Study the core concepts|Focus first on/u);
+  assert.equal(getContentLanguage({ preferredLanguage: 'English' }), 'English');
+  assert.match(getContentLanguageInstruction('English'), /clear, professional English/);
+});
+
+test('skill-gap model records language while allowing older records without it', async () => {
+  const baseAnalysis = {
+    student: '507f1f77bcf86cd799439011',
+    user: '507f1f77bcf86cd799439012',
+    career: '507f1f77bcf86cd799439013',
+    careerTitle: 'Frontend Developer',
+    matchPercentage: 50,
+    summary: 'A sample analysis.',
+  };
+  const assameseAnalysis = new SkillGapAnalysis({
+    ...baseAnalysis,
+    contentLanguage: 'Assamese',
+  });
+  const legacyAnalysis = new SkillGapAnalysis(baseAnalysis);
+
+  await assameseAnalysis.validate();
+  await legacyAnalysis.validate();
+  assert.equal(assameseAnalysis.contentLanguage, 'Assamese');
+  assert.equal(legacyAnalysis.contentLanguage, undefined);
 });
 
 test('skill-gap analysis endpoints require authentication', async () => {

@@ -14,8 +14,8 @@ export const slugifyTitle = (title) => {
 };
 
 /**
- * Comprehensive Multi-Sector Career Catalog
- * Covers Technology, Finance & Banking, Sales & Marketing, Business & Management, and Design
+ * Comprehensive multi-sector career catalog
+ * Covers technology, finance, sales, management, design, and education careers
  */
 const DEFAULT_CAREERS = [
   // ================= TECHNOLOGY SECTOR =================
@@ -311,6 +311,51 @@ const DEFAULT_CAREERS = [
     ],
     industryDemand: 'Very High',
     averageSalaryRange: { min: 800000, max: 2200000, currency: 'INR' },
+    experienceLevel: 'Entry Level',
+  },
+  {
+    title: 'Accountant',
+    slug: 'accountant',
+    sector: 'Finance & Banking',
+    description: 'Maintains financial records, prepares statements, supports tax compliance, and helps organizations make accurate financial decisions.',
+    requiredTechnicalSkills: [
+      { name: 'Accounting', importance: 'Core', weight: 2 },
+      { name: 'Financial Reporting', importance: 'Core', weight: 2 },
+      { name: 'Taxation', importance: 'Core', weight: 1.5 },
+      { name: 'Excel', importance: 'Core', weight: 1.5 },
+      { name: 'Bookkeeping', importance: 'Preferred', weight: 1 },
+    ],
+    requiredSoftSkills: ['Attention to Detail', 'Integrity', 'Organization', 'Communication'],
+    requiredQualifications: ['Bachelor degree in Accounting, Commerce, Finance, or a related discipline'],
+    suggestedNextSteps: [
+      'Practice preparing balance sheets, income statements, and cash-flow statements.',
+      'Build proficiency in Excel and accounting software used by local employers.',
+      'Learn the tax and compliance requirements relevant to your intended industry.',
+    ],
+    industryDemand: 'High',
+    averageSalaryRange: { min: 300000, max: 800000, currency: 'INR' },
+    experienceLevel: 'Entry Level',
+  },
+  {
+    title: 'Teacher',
+    slug: 'teacher',
+    sector: 'Education & Training',
+    description: 'Plans lessons, teaches a subject to learners, assesses progress, and adapts instruction to support different learning needs.',
+    requiredTechnicalSkills: [
+      { name: 'Subject Knowledge', importance: 'Core', weight: 2 },
+      { name: 'Lesson Planning', importance: 'Core', weight: 2 },
+      { name: 'Classroom Management', importance: 'Core', weight: 1.5 },
+      { name: 'Educational Technology', importance: 'Preferred', weight: 1 },
+    ],
+    requiredSoftSkills: ['Communication', 'Patience', 'Empathy', 'Organization'],
+    requiredQualifications: ['Bachelor degree in the subject area; teaching qualification requirements vary by school and region'],
+    suggestedNextSteps: [
+      'Choose a subject and learner age group, then prepare a short sample lesson.',
+      'Practice explaining a topic clearly and checking learner understanding.',
+      'Research teaching qualification and certification requirements in your region.',
+    ],
+    industryDemand: 'High',
+    averageSalaryRange: { min: 300000, max: 700000, currency: 'INR' },
     experienceLevel: 'Entry Level',
   },
 

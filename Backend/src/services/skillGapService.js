@@ -4,6 +4,11 @@ import { calculateCareerMatch } from './careerRecommendationService.js';
 import { getCareerById } from './careerService.js';
 import { getMyProfile } from './studentService.js';
 import { generateStructuredJSON } from './geminiService.js';
+import {
+  containsAssameseText,
+  getContentLanguage,
+  getContentLanguageInstruction,
+} from './aiContentLanguage.js';
 
 const PRIORITY_RANK = { High: 3, Medium: 2, Low: 1 };
 
@@ -13,13 +18,20 @@ const getSkillPriority = (importance, weight) => {
   return 'Low';
 };
 
-const defaultLearningSteps = (skillName, careerTitle) => [
-  `Study the core concepts of ${skillName} used in ${careerTitle} roles.`,
-  `Build a small project that demonstrates practical use of ${skillName}.`,
-  `Document your project and explain your ${skillName} decisions in your portfolio.`,
-];
+const defaultLearningSteps = (skillName, careerTitle, language = 'English') =>
+  language === 'Assamese'
+    ? [
+        `${careerTitle}ৰ কামত ব্যৱহৃত ${skillName}ৰ মূল ধাৰণাসমূহ অধ্যয়ন কৰক।`,
+        `${skillName} ব্যৱহাৰ কৰি ব্যৱহাৰিক দক্ষতা দেখুওৱা এটা সৰু প্ৰকল্প নিৰ্মাণ কৰক।`,
+        `প্ৰকল্পটো নথিভুক্ত কৰক আৰু portfolioত ${skillName} সম্পৰ্কীয় আপোনাৰ সিদ্ধান্তসমূহ ব্যাখ্যা কৰক।`,
+      ]
+    : [
+        `Study the core concepts of ${skillName} used in ${careerTitle} roles.`,
+        `Build a small project that demonstrates practical use of ${skillName}.`,
+        `Document your project and explain your ${skillName} decisions in your portfolio.`,
+      ];
 
-export const buildSkillGapResult = (student, career) => {
+export const buildSkillGapResult = (student, career, language = 'English') => {
   const careerMatch = calculateCareerMatch(student, career);
   const missingNames = new Set(
     careerMatch.missingSkills.map((name) => name.toLowerCase().trim())
@@ -42,7 +54,7 @@ export const buildSkillGapResult = (student, career) => {
         importance: requiredSkill.importance || 'Core',
         weight,
         priority: getSkillPriority(requiredSkill.importance || 'Core', weight),
-        learningSteps: defaultLearningSteps(requiredSkill.name, career.title),
+        learningSteps: defaultLearningSteps(requiredSkill.name, career.title, language),
       };
     });
 
@@ -64,7 +76,7 @@ export const buildSkillGapResult = (student, career) => {
         importance: 'Preferred',
         weight: 1,
         priority: 'Low',
-        learningSteps: defaultLearningSteps(requiredSkill, career.title),
+        learningSteps: defaultLearningSteps(requiredSkill, career.title, language),
       });
     }
   }
@@ -85,7 +97,15 @@ export const buildSkillGapResult = (student, career) => {
   };
 };
 
-const createFallbackSummary = (careerTitle, matchingCount, missingCount) => {
+export const createFallbackSummary = (careerTitle, matchingCount, missingCount, language = 'English') => {
+  if (language === 'Assamese') {
+    if (missingCount === 0) {
+      return `আপুনি ${careerTitle}ৰ বাবে তালিকাভুক্ত সকলো কাৰিকৰী দক্ষতাৰ সৈতে বৰ্তমান মিল খায়। ব্যৱহাৰিক প্ৰকল্পৰ জৰিয়তে এই দক্ষতাসমূহ আৰু অধিক শক্তিশালী কৰি যাওক।`;
+    }
+
+    return `${careerTitle}ৰ বাবে আপুনি বৰ্তমান ${matchingCount}টা তালিকাভুক্ত দক্ষতাৰ সৈতে মিল খায়। তলত অগ্ৰাধিকাৰ অনুসৰি দেখুওৱা ${missingCount}টা দক্ষতাৰ ব্যৱধান পূৰণ কৰাত মনোযোগ দিয়ক।`;
+  }
+
   if (missingCount === 0) {
     return `You currently match all listed technical skill requirements for ${careerTitle}. Continue strengthening these skills through practical projects.`;
   }
@@ -93,12 +113,10 @@ const createFallbackSummary = (careerTitle, matchingCount, missingCount) => {
   return `You currently match ${matchingCount} listed skill${matchingCount === 1 ? '' : 's'} for ${careerTitle}. Focus first on the ${missingCount} prioritized skill gap${missingCount === 1 ? '' : 's'} below.`;
 };
 
-const enrichSkillGaps = async (student, career, gaps) => {
-  if (gaps.length === 0) return null;
-
-  const prompt = `
+export const buildSkillGapPrompt = (student, career, gaps, language) => `
 Create a practical skill-gap learning plan for this career.
 Use only the supplied missing skills. Do not invent courses, certifications, or URLs.
+${getContentLanguageInstruction(language)}
 Return JSON matching this schema:
 {
   "summary": "string",
@@ -128,9 +146,12 @@ Missing skills, ordered by priority: ${JSON.stringify(
   )}
 `;
 
+const enrichSkillGaps = async (student, career, gaps, language) => {
+  if (gaps.length === 0) return null;
+
   const result = await generateStructuredJSON(
-    prompt,
-    'You are a career-skills coach. Return concise, practical advice as valid JSON.'
+    buildSkillGapPrompt(student, career, gaps, language),
+    `You are a career-skills coach. Return concise, practical advice as valid JSON. ${getContentLanguageInstruction(language)}`
   );
 
   if (!result || typeof result !== 'object' || Array.isArray(result)) return null;
@@ -145,13 +166,16 @@ Missing skills, ordered by priority: ${JSON.stringify(
       const steps = plan.learningSteps
         .filter((step) => typeof step === 'string' && step.trim())
         .map((step) => step.trim().slice(0, 300))
+        .filter((step) => language !== 'Assamese' || containsAssameseText(step))
         .slice(0, 3);
       if (steps.length > 0) plans.set(skillName, steps);
     }
   }
 
   const summary =
-    typeof result.summary === 'string' && result.summary.trim()
+    typeof result.summary === 'string' &&
+    result.summary.trim() &&
+    (language !== 'Assamese' || containsAssameseText(result.summary))
       ? result.summary.trim().slice(0, 1000)
       : null;
   if (!summary && plans.size === 0) return null;
@@ -169,14 +193,22 @@ export const analyzeSkillGap = async (userId, careerId) => {
     throw ApiError.notFound('Career is not available');
   }
 
-  const result = buildSkillGapResult(student, career);
-  const aiEnrichment = await enrichSkillGaps(student, career, result.missingSkills);
+  const contentLanguage = getContentLanguage(student);
+  const result = buildSkillGapResult(student, career, contentLanguage);
+  const aiEnrichment = await enrichSkillGaps(
+    student,
+    career,
+    result.missingSkills,
+    contentLanguage
+  );
 
   if (aiEnrichment) {
     result.missingSkills = result.missingSkills.map((gap) => ({
       ...gap,
-      learningSteps:
-        aiEnrichment.plans.get(gap.name.toLowerCase()) || gap.learningSteps,
+      learningSteps: aiEnrichment.plans.get(gap.name.toLowerCase()) ||
+        (contentLanguage === 'Assamese'
+          ? defaultLearningSteps(gap.name, career.title, contentLanguage)
+          : gap.learningSteps),
     }));
   }
 
@@ -185,6 +217,7 @@ export const analyzeSkillGap = async (userId, careerId) => {
     user: userId,
     career: career._id,
     careerTitle: career.title,
+    contentLanguage,
     matchPercentage: result.matchPercentage,
     matchingSkills: result.matchingSkills,
     missingSkills: result.missingSkills,
@@ -193,7 +226,8 @@ export const analyzeSkillGap = async (userId, careerId) => {
       createFallbackSummary(
         career.title,
         result.matchingSkills.length,
-        result.missingSkills.length
+        result.missingSkills.length,
+        contentLanguage
       ),
     isAIEnriched: Boolean(aiEnrichment),
   });

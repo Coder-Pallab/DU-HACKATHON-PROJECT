@@ -64,6 +64,7 @@ router.post(
   validateRoadmapGeneration,
   learningRoadmapController.generateLearningRoadmap
 );
+router.get('/roadmaps', learningRoadmapController.listLearningRoadmaps);
 router.get(
   '/roadmaps/:careerId',
   validateRoadmapCareerId,

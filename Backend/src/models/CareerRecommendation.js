@@ -12,6 +12,10 @@ const recommendationItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    sector: {
+      type: String,
+      default: '',
+    },
     careerDescription: {
       type: String,
       default: '',
@@ -20,6 +24,12 @@ const recommendationItemSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    localizedCareerTitle: { type: String, default: '' },
+    localizedSector: { type: String, default: '' },
+    localizedCareerDescription: { type: String, default: '' },
+    localizedCareerFitSummary: { type: String, default: '' },
+    localizedRequiredQualifications: { type: [String], default: [] },
+    localizedSuggestedNextSteps: { type: [String], default: [] },
     matchPercentage: {
       type: Number,
       required: true,
@@ -67,6 +77,11 @@ const careerRecommendationSchema = new mongoose.Schema(
       index: true,
     },
     recommendations: [recommendationItemSchema],
+    contentLanguage: {
+      type: String,
+      enum: ['English', 'Assamese'],
+      default: 'English',
+    },
     isAIEnriched: {
       type: Boolean,
       default: false,
