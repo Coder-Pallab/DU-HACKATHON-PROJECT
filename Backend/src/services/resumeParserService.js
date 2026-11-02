@@ -1,26 +1,98 @@
 import fs from 'fs';
 import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
+import { ENV } from '../config/env.js';
+import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 import { ApiError } from '../utils/apiError.js';
+
+const readRemoteResponse = async (response) => {
+  const contentLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(contentLength) && contentLength > ENV.MAX_FILE_SIZE_BYTES) {
+    await response.body?.cancel();
+    throw ApiError.badRequest('Stored resume exceeds the maximum supported file size.');
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  if (buffer.length > ENV.MAX_FILE_SIZE_BYTES) {
+    throw ApiError.badRequest('Stored resume exceeds the maximum supported file size.');
+  }
+  return buffer;
+};
+
+export const downloadCloudinaryResume = async (publicId, fileType) => {
+  if (!isCloudinaryConfigured || !publicId || !['pdf', 'docx'].includes(fileType)) {
+    throw ApiError.serviceUnavailable(
+      'Cloudinary could not provide this resume. Check its delivery permissions or re-upload it.'
+    );
+  }
+
+  const downloadUrl = cloudinary.utils.private_download_url(publicId, fileType, {
+    resource_type: 'raw',
+    type: 'upload',
+    expires_at: Math.floor(Date.now() / 1000) + 300,
+    attachment: false,
+  });
+
+  let response;
+  try {
+    response = await fetch(downloadUrl, { signal: AbortSignal.timeout(15000) });
+  } catch {
+    throw ApiError.serviceUnavailable(
+      'Could not reach Cloudinary authenticated download. Check Cloudinary availability and try again.'
+    );
+  }
+
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw ApiError.serviceUnavailable(
+      `Cloudinary authenticated download failed with HTTP ${response.status}. Check the Cloudinary credentials and resume asset.`,
+      [{ provider: 'Cloudinary', status: response.status }]
+    );
+  }
+
+  return readRemoteResponse(response);
+};
 
 /**
  * Fetch buffer from local file or remote URL
- * @param {string} localFilePath 
- * @param {string} remoteUrl 
+ * @param {object} resume
  * @returns {Promise<Buffer>}
  */
-const getFileBuffer = async (localFilePath, remoteUrl) => {
-  if (localFilePath && fs.existsSync(localFilePath)) {
-    return fs.readFileSync(localFilePath);
+const getFileBuffer = async (resume) => {
+  if (resume.localFilePath && fs.existsSync(resume.localFilePath)) {
+    return fs.readFileSync(resume.localFilePath);
   }
 
-  if (remoteUrl && remoteUrl.startsWith('http')) {
-    const response = await fetch(remoteUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to download remote resume from ${remoteUrl}`);
+  if (resume.fileUrl && resume.fileUrl.startsWith('http')) {
+    let response;
+    try {
+      response = await fetch(resume.fileUrl, { signal: AbortSignal.timeout(15000) });
+    } catch {
+      throw ApiError.serviceUnavailable(
+        'Could not reach remote resume storage. Check Cloudinary availability and try again.'
+      );
     }
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+
+    if (!response.ok) {
+      const remoteHost = new URL(resume.fileUrl).hostname;
+      const isCloudinary = remoteHost === 'res.cloudinary.com' || remoteHost.endsWith('.cloudinary.com');
+      await response.body?.cancel();
+
+      if (isCloudinary && [401, 403].includes(response.status)) {
+        return downloadCloudinaryResume(resume.cloudinaryPublicId, resume.fileType);
+      }
+
+      if (response.status === 404) {
+        throw ApiError.notFound('The stored resume file could not be found in remote storage.');
+      }
+
+      throw ApiError.serviceUnavailable(
+        `Remote resume storage returned HTTP ${response.status}. Try again later or re-upload the resume.`,
+        [{ status: response.status }]
+      );
+    }
+
+    return readRemoteResponse(response);
   }
 
   throw ApiError.notFound('Resume file cannot be located on disk or cloud storage');
@@ -32,7 +104,7 @@ const getFileBuffer = async (localFilePath, remoteUrl) => {
  * @returns {Promise<string>} Cleaned extracted text
  */
 export const extractResumeText = async (resume) => {
-  const buffer = await getFileBuffer(resume.localFilePath, resume.fileUrl);
+  const buffer = await getFileBuffer(resume);
 
   let rawText = '';
 
@@ -122,4 +194,3 @@ export const baselineExtractSections = (text) => {
     certifications: [],
   };
 };
-

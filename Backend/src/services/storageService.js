@@ -34,7 +34,7 @@ export const storeResumeFile = async (file) => {
 
   // Local storage fallback
   return {
-    fileUrl: `/uploads/${file.filename}`,
+    fileUrl: '',
     cloudinaryPublicId: '',
     storageType: 'local',
     localFilePath: file.path,
@@ -62,4 +62,3 @@ export const removeStoredFile = async (resume) => {
     }
   }
 };
-

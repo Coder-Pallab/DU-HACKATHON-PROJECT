@@ -14,7 +14,6 @@ apiRouter.get('/', (req, res) => {
     success: true,
     message: 'Welcome to the AI-Powered Career Guidance & Placement Assistance API (v1)',
     data: {
-      documentation: '/api/v1/docs',
       health: '/api/v1/health',
       availableModules: [
         'Authentication & Authorization (/api/v1/auth)',

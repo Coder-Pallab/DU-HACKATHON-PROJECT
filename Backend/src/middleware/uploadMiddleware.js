@@ -31,17 +31,17 @@ const storage = multer.diskStorage({
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/msword',
 ];
 
-const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.doc'];
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx'];
+
+export const isAllowedResumeFile = (file) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  return ALLOWED_MIME_TYPES.includes(file.mimetype) && ALLOWED_EXTENSIONS.includes(ext);
+};
 
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const isMimeValid = ALLOWED_MIME_TYPES.includes(file.mimetype);
-  const isExtValid = ALLOWED_EXTENSIONS.includes(ext);
-
-  if (isMimeValid && isExtValid) {
+  if (isAllowedResumeFile(file)) {
     cb(null, true);
   } else {
     cb(
@@ -60,4 +60,3 @@ export const uploadResumeFile = multer({
   },
   fileFilter,
 });
-

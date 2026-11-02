@@ -41,12 +41,9 @@ export const connectDB = async () => {
 
     return conn.connection;
   } catch (error) {
+    isConnected = false;
     console.error(`[MongoDB] Initial connection failed: ${error.message}`);
-    // In production we may want to exit, but in dev we let the server run so health checks report DB status
-    if (ENV.NODE_ENV === 'production') {
-      process.exit(1);
-    }
-    return null;
+    throw error;
   }
 };
 
@@ -79,4 +76,3 @@ export const getDatabaseStatus = () => {
     name: mongoose.connection.name || null,
   };
 };
-

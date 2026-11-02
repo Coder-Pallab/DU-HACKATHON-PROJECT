@@ -8,8 +8,8 @@ import * as authService from '../services/authService.js';
  * POST /api/v1/auth/register
  */
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role, phone } = req.body;
-  const result = await authService.register({ name, email, password, role, phone });
+  const { name, email, password, phone } = req.body;
+  const result = await authService.register({ name, email, password, phone });
 
   return ApiResponse.success(
     res,
@@ -91,4 +91,3 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   return ApiResponse.success(res, null, result.message);
 });
-

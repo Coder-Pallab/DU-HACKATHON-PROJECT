@@ -1,17 +1,16 @@
 import app from './app.js';
 import { connectDB, disconnectDB } from './config/db.js';
-import { ENV } from './config/env.js';
+import { assertRuntimeConfig, ENV } from './config/env.js';
 import dns from 'dns'
-
 let server;
 
-dns.setServers(['1.1.1.1', '8.8.0.0']);
-
+dns.setServers(['1.1.1.1','8.8.8.8'])
 /**
  * Start the HTTP server after initializing database
  */
 const startServer = async () => {
   try {
+    assertRuntimeConfig();
     // Attempt database connection
     await connectDB();
 
@@ -72,4 +71,3 @@ process.on('uncaughtException', (error) => {
 
 // Launch server
 startServer();
-

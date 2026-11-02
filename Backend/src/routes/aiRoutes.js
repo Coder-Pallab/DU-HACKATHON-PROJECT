@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as aiController from '../controllers/aiController.js';
 import * as careerController from '../controllers/careerController.js';
 import { authenticate } from '../middleware/authMiddleware.js';
+import { requireDatabase } from '../middleware/requireDatabase.js';
 import { aiLimiter } from '../middleware/rateLimiter.js';
 import { validateExtractSkills, validateClassifySkills } from '../validators/aiValidator.js';
 import * as skillGapController from '../controllers/skillGapController.js';
@@ -26,6 +27,7 @@ const router = Router();
 
 // Protect all AI routes with authentication
 router.use(authenticate);
+router.use(requireDatabase);
 
 /**
  * AI-Powered Skill Extraction & Classification (Rate-Limited)

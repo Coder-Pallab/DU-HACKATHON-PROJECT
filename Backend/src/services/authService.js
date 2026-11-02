@@ -8,11 +8,12 @@ import {
   hashToken,
 } from '../utils/token.js';
 import { isProduction } from '../config/env.js';
+import { ROLES } from '../constants/roles.js';
 
 /**
  * Register a new user
  */
-export const register = async ({ name, email, password, role, phone }) => {
+export const register = async ({ name, email, password, phone }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw ApiError.conflict('An account with this email address already exists');
@@ -22,7 +23,7 @@ export const register = async ({ name, email, password, role, phone }) => {
     name,
     email,
     password,
-    role: role || undefined,
+    role: ROLES.STUDENT,
     phone: phone || '',
   });
 
@@ -224,4 +225,3 @@ export const getMe = async (userId) => {
   }
   return user;
 };
-

@@ -17,7 +17,18 @@ export const uploadResume = async (userId, file) => {
   }
 
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-  const fileType = ext === 'doc' ? 'docx' : ext;
+  const fileType = ext;
+
+  let extractedText = '';
+  try {
+    extractedText = await extractResumeText({
+      fileType,
+      localFilePath: file.path,
+      fileUrl: '',
+    });
+  } catch (parseError) {
+    console.warn(`[ResumeParser] Automatic text extraction deferred: ${parseError.message}`);
+  }
 
   // Check if associated student profile exists
   const student = await Student.findOne({ user: userId });
@@ -41,18 +52,11 @@ export const uploadResume = async (userId, file) => {
     cloudinaryPublicId: storageResult.cloudinaryPublicId,
     localFilePath: storageResult.localFilePath,
     isPrimary: existingCount === 0,
-    parsingStatus: 'pending',
+    extractedText,
+    parsingStatus: extractedText ? 'parsed' : 'pending',
   });
-
-  // Automatically attempt text extraction
-  try {
-    const text = await extractResumeText(resume);
-    if (text) {
-      resume.extractedText = text;
-      resume.parsingStatus = 'parsed';
-    }
-  } catch (parseError) {
-    console.warn(`[ResumeParser] Automatic text extraction deferred: ${parseError.message}`);
+  if (resume.storageType === 'local') {
+    resume.fileUrl = `/api/v1/resumes/${resume._id}/download`;
   }
 
   await resume.save();
@@ -156,10 +160,14 @@ export const downloadResume = async (resumeId, requestingUser) => {
 export const parseResume = async (resumeId, requestingUser) => {
   const resume = await getResumeById(resumeId, requestingUser);
 
-  const text = await extractResumeText(resume);
-  resume.extractedText = text;
-  resume.parsingStatus = 'parsed';
-  await resume.save();
+  const text = resume.extractedText || (await extractResumeText(resume));
+  if (!resume.extractedText) {
+    resume.extractedText = text;
+    if (resume.parsingStatus !== 'analyzed') {
+      resume.parsingStatus = 'parsed';
+    }
+    await resume.save();
+  }
 
   return {
     resumeId: resume._id,
@@ -232,4 +240,3 @@ export const deleteResume = async (resumeId, requestingUser) => {
 
   return true;
 };
-

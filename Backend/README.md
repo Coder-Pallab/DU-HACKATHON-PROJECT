@@ -9,7 +9,7 @@ A modular, production-ready RESTful backend built with Node.js, Express.js, Mong
 - **Runtime & Framework:** Node.js (v20+ / v24+), Express.js (v5)
 - **Database:** MongoDB & Mongoose
 - **Authentication:** JWT (JSON Web Tokens) with Access & Refresh tokens, bcryptjs
-- **AI Integration:** Google Gemini API (`@google/generative-ai`)
+- **AI Integration:** Google Gemini API (`@google/genai` for chat; `@google/generative-ai` for structured generation)
 - **File Uploads & Storage:** Multer, Cloudinary (with local storage fallback)
 - **Document Parsing:** `pdf-parse`, `mammoth` (DOCX parsing)
 - **Security:** Helmet, CORS, Express-Rate-Limit
@@ -139,7 +139,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ### 🔐 Authentication & Authorization Endpoints (`/api/v1/auth`)
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/v1/auth/register` | Public | Register new user (Student, Admin, Recruiter) |
+| `POST` | `/api/v1/auth/register` | Public | Register a student account |
 | `POST` | `/api/v1/auth/login` | Public | Login with email & password, returns JWT tokens |
 | `POST` | `/api/v1/auth/logout` | Bearer Token | Revoke refresh token and logout |
 | `POST` | `/api/v1/auth/refresh-token` | Public | Refresh expired access token |
@@ -176,6 +176,8 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 | `POST` | `/api/v1/resumes/:id/analyze` | Bearer Token | Parse resume sections (skills, experience, education) |
 | `DELETE` | `/api/v1/resumes/:id` | Bearer Token | Delete resume from storage and database |
 
+Resume text is extracted from the uploaded file before it is sent to Cloudinary and cached in MongoDB. For older Cloudinary resumes without cached text, parsing tries Cloudinary's short-lived authenticated download API when public raw-file delivery is denied. If authenticated download also fails, parsing returns `503` with the provider status; check the Cloudinary credentials and asset.
+
 ### 💼 Career Catalog Endpoints (`/api/v1/careers`)
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
@@ -207,4 +209,6 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 - `POST /api/v1/ai/chat/messages` accepts `{ "message": "How can I prepare for data analyst roles?", "language": "English" }`. `language` is optional and defaults to the student's preferred language (English or Assamese). Send a returned `conversationId` on later messages to continue a conversation; supply `language` to switch languages.
 - `GET /api/v1/ai/chat/conversations` lists the authenticated user's saved conversations (`page` and `limit` optional; limit is capped at 50).
 - `GET /api/v1/ai/chat/conversations/:conversationId` retrieves one conversation's complete persisted history and denies access to other users' conversations.
-- Conversations are stored in MongoDB. Replies use Gemini's `generateContent` API with `GEMINI_CHAT_MODEL` (defaults to `gemini-3.8-flash`). Provider data handling follows Google's Gemini API terms. If Gemini is unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message.
+- Conversations are stored in MongoDB. Replies use Gemini's Interactions API with `GEMINI_CHAT_MODEL` (defaults to `gemini-3.8-flash`). Provider data handling follows Google's Gemini API terms. If Gemini is unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message.
+
+The backend only starts after a successful MongoDB connection. If MongoDB disconnects while running, database-backed routes return `503 Service Unavailable` instead of waiting for Mongoose's query-buffer timeout. Check that the MongoDB service is running and `MONGODB_URI` in `Backend/.env` points to a reachable database.

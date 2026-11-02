@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 import { validateRequest } from './validateRequest.js';
-import { ALL_ROLES } from '../constants/roles.js';
+import { ROLES } from '../constants/roles.js';
 
 export const validateRegister = [
   body('name')
@@ -27,8 +27,8 @@ export const validateRegister = [
     .withMessage('Password must contain at least one letter'),
   body('role')
     .optional()
-    .isIn(ALL_ROLES)
-    .withMessage(`Role must be one of: ${ALL_ROLES.join(', ')}`),
+    .equals(ROLES.STUDENT)
+    .withMessage('Public registration is limited to student accounts'),
   body('phone')
     .optional()
     .trim()
@@ -108,4 +108,3 @@ export const validateRefreshToken = [
     .withMessage('Refresh token is required'),
   validateRequest,
 ];
-

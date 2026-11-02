@@ -1,8 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import { ENV } from './config/env.js';
 import { requestLogger } from './middleware/requestLogger.js';
@@ -10,9 +8,6 @@ import { generalLimiter } from './middleware/rateLimiter.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import apiRouter from './routes/index.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -45,10 +40,6 @@ app.use(generalLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static directory for uploaded files (if local storage fallback is used)
-const uploadsDirectory = path.resolve(__dirname, '../uploads');
-app.use('/uploads', express.static(uploadsDirectory));
-
 // Root welcome route
 app.get('/', (req, res) => {
   res.json({
@@ -73,4 +64,3 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;
-

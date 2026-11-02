@@ -15,11 +15,13 @@ import {
   validateUpdateSkill,
 } from '../validators/aiValidator.js';
 import { authenticate } from '../middleware/authMiddleware.js';
+import { requireDatabase } from '../middleware/requireDatabase.js';
 
 const router = Router();
 
 // Protect all student routes with JWT authentication
 router.use(authenticate);
+router.use(requireDatabase);
 
 /**
  * Career Recommendations Endpoints (Section 7)
