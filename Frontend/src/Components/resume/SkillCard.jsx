@@ -1,10 +1,13 @@
-import { Code2, TrendingUp } from "lucide-react";
+import { Code2 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function SkillCard({
   name = "React.js",
   level = "Intermediate",
   percentage = 75,
 }) {
+  const { t } = useLanguage();
+
   const getLevelStyle = () => {
     if (percentage >= 80) {
       return "bg-green-100 text-green-700";
@@ -38,7 +41,7 @@ function SkillCard({
             </h3>
 
             <p className="text-xs text-slate-500">
-              Skill proficiency
+              {t("Skill proficiency")}
             </p>
           </div>
         </div>
@@ -46,7 +49,7 @@ function SkillCard({
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${getLevelStyle()}`}
         >
-          {level}
+          {t(level, level)}
         </span>
 
       </div>
@@ -54,7 +57,7 @@ function SkillCard({
       {/* Progress */}
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm text-slate-500">
-          Proficiency
+          {t("Proficiency")}
         </span>
 
         <span className="text-sm font-semibold text-slate-800">
@@ -72,16 +75,8 @@ function SkillCard({
       >
         <div
           className="h-full rounded-full bg-teal-600 transition-all duration-500"
-          style={{
-            width: `${Math.min(100, Math.max(0, percentage))}%`,
-          }}
+          style={{ width: `${percentage}%` }}
         />
-      </div>
-
-      {/* Footer */}
-      <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
-        <TrendingUp size={14} className="text-teal-600" />
-        <span>Skill assessment overview</span>
       </div>
 
     </div>

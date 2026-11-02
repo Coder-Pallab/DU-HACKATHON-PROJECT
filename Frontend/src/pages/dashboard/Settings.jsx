@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PageHeader from "../../Components/layout/PageHeader";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import AccountSettings from "../../Components/settings/AccountSettings";
 import LanguageSettings from "../../Components/settings/LanguageSettings";
@@ -14,7 +15,7 @@ function Settings() {
     course: "BCA",
   });
 
-  const [language, setLanguage] = useState("en");
+  const { language, setLanguage } = useLanguage();
 
   const [accessibility, setAccessibility] = useState({
     fontSize: "medium",

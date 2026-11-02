@@ -4,6 +4,7 @@ import {
   Clock,
   ArrowRight,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function CareerCard({
   title = "Frontend Developer",
@@ -14,6 +15,8 @@ function CareerCard({
   skills = ["HTML", "CSS", "JavaScript", "React"],
   onViewDetails,
 }) {
+  const { t } = useLanguage();
+
   const getMatchStyle = () => {
     if (matchPercentage >= 85) {
       return "bg-green-100 text-green-700";
@@ -38,11 +41,11 @@ function CareerCard({
 
           <div className="min-w-0">
             <h3 className="break-words text-lg font-semibold text-slate-800">
-              {title}
+              {t(title, title)}
             </h3>
 
             <p className="mt-1 text-xs text-slate-500">
-              Recommended career
+              {t("Recommended career")}
             </p>
           </div>
         </div>
@@ -50,13 +53,13 @@ function CareerCard({
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${getMatchStyle()}`}
         >
-          {matchPercentage}% Match
+          {matchPercentage}% {t("Match")}
         </span>
       </div>
 
       {/* Description */}
       <p className="mb-5 text-sm leading-relaxed text-slate-600">
-        {description}
+        {t(description, description)}
       </p>
 
       {/* Career Information */}
@@ -64,7 +67,7 @@ function CareerCard({
         <div className="rounded-xl bg-slate-50 p-3">
           <div className="mb-2 flex items-center gap-2 text-slate-500">
             <TrendingUp size={16} />
-            <span className="text-xs">Expected Salary</span>
+            <span className="text-xs">{t("Expected Salary")}</span>
           </div>
 
           <p className="text-sm font-semibold text-slate-800">
@@ -75,7 +78,7 @@ function CareerCard({
         <div className="rounded-xl bg-slate-50 p-3">
           <div className="mb-2 flex items-center gap-2 text-slate-500">
             <Clock size={16} />
-            <span className="text-xs">Experience</span>
+            <span className="text-xs">{t("Experience")}</span>
           </div>
 
           <p className="text-sm font-semibold text-slate-800">
@@ -87,7 +90,7 @@ function CareerCard({
       {/* Required Skills */}
       <div className="mb-5">
         <h4 className="mb-3 text-sm font-semibold text-slate-700">
-          Relevant Skills
+          {t("Relevant Skills")}
         </h4>
 
         <div className="flex flex-wrap gap-2">
@@ -109,7 +112,7 @@ function CareerCard({
           onClick={onViewDetails}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-800"
         >
-          View Career Details
+          {t("View Career Details")}
           <ArrowRight size={17} />
         </button>
       </div>

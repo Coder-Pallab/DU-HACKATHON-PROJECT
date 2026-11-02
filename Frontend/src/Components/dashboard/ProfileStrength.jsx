@@ -2,8 +2,11 @@ import { UserRound, ArrowRight } from "lucide-react";
 
 import ProgressBar from "../common/ProgressBar";
 import Button from "../common/Button";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ProfileStrength({ percentage = 70 }) {
+  const { t } = useLanguage();
+
   const suggestions = [
     "Add your educational details",
     "Update your skills",
@@ -17,11 +20,11 @@ function ProfileStrength({ percentage = 70 }) {
 
         <div>
           <h2 className="text-lg font-bold text-slate-900">
-            Profile Strength
+            {t("Profile Strength")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Complete your profile for better recommendations.
+            {t("Complete your profile for better recommendations.")}
           </p>
         </div>
 
@@ -35,7 +38,7 @@ function ProfileStrength({ percentage = 70 }) {
         <div className="mb-2 flex justify-between">
 
           <span className="text-sm font-medium text-slate-600">
-            Profile Completion
+            {t("Profile Completion")}
           </span>
 
           <span className="text-sm font-bold text-teal-700">
@@ -52,7 +55,7 @@ function ProfileStrength({ percentage = 70 }) {
       </div>
 
       <h3 className="mb-3 text-sm font-semibold text-slate-800">
-        Recommended Actions
+        {t("Recommended Actions")}
       </h3>
 
       <div className="space-y-3">
@@ -60,14 +63,14 @@ function ProfileStrength({ percentage = 70 }) {
         {suggestions.map((suggestion, index) => (
           <div key={index} className="flex items-center gap-2 text-sm text-slate-600">
             <span className="h-2 w-2 rounded-full bg-teal-600" />
-            {suggestion}
+            {t(suggestion, suggestion)}
           </div>
         ))}
 
       </div>
 
       <Button variant="outline" className="mt-6 w-full">
-        Complete Profile
+        {t("Complete Profile")}
         <ArrowRight size={16} className="ml-2 inline" />
       </Button>
 

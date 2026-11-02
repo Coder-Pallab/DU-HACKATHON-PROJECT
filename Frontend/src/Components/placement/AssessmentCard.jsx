@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const iconMap = {
   aptitude: Brain,
@@ -23,6 +24,7 @@ function AssessmentCard({
   score = null,
   onStart,
 }) {
+  const { t } = useLanguage();
   const Icon = iconMap[category] || Brain;
 
   const isCompleted = status === "Completed";
@@ -44,30 +46,30 @@ function AssessmentCard({
               : "bg-gray-100 text-gray-600"
           }`}
         >
-          {status}
+          {t(status, status)}
         </span>
       </div>
 
       {/* Content */}
       <div className="flex-1">
         <h3 className="text-lg font-semibold text-gray-800">
-          {title}
+          {t(title, title)}
         </h3>
 
         <p className="mt-2 text-sm leading-relaxed text-gray-500">
-          {description}
+          {t(description, description)}
         </p>
 
         {/* Assessment Information */}
         <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">
             <Clock size={15} />
-            <span>{duration}</span>
+            <span>{t(duration, duration)}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <Brain size={15} />
-            <span>{questions} Questions</span>
+            <span>{questions} {t("Questions")}</span>
           </div>
         </div>
       </div>
@@ -77,11 +79,11 @@ function AssessmentCard({
         {isCompleted ? (
           <div className="flex items-center gap-2 text-sm font-medium text-green-700">
             <CheckCircle2 size={17} />
-            <span>Score: {score ?? 0}%</span>
+            <span>{t("Score:")} {score ?? 0}%</span>
           </div>
         ) : (
           <span className="text-xs text-gray-400">
-            Ready to begin?
+            {t("Ready to begin?")}
           </span>
         )}
 
@@ -90,7 +92,7 @@ function AssessmentCard({
           onClick={onStart}
           className="flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800"
         >
-          {isCompleted ? "Retake" : "Start"}
+          {isCompleted ? t("Retake") : t("Start")}
           <ArrowRight size={16} />
         </button>
       </div>

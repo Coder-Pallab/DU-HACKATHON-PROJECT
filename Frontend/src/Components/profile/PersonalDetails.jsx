@@ -2,8 +2,10 @@ import { useState } from "react";
 import { UserRound } from "lucide-react";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function PersonalDetails() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -25,7 +27,7 @@ function PersonalDetails() {
     e.preventDefault();
 
     console.log("Personal Details:", formData);
-    alert("Personal details saved successfully!");
+    alert(t("Personal details saved successfully!"));
   };
 
   return (
@@ -38,11 +40,11 @@ function PersonalDetails() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Personal Details
+            {t("Personal Details")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Tell us a little about yourself.
+            {t("Tell us a little about yourself.")}
           </p>
         </div>
       </div>
@@ -99,7 +101,7 @@ function PersonalDetails() {
 
         <div className="flex justify-end border-t border-slate-100 pt-5">
           <Button type="submit">
-            Save Details
+            {t("Save Details")}
           </Button>
         </div>
       </form>

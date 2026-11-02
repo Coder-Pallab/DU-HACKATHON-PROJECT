@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { UserRound, Save } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function AccountSettings({ initialValues, onSave }) {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     fullName: "Aditya Sharma",
     email: "student@example.com",
@@ -28,7 +30,7 @@ function AccountSettings({ initialValues, onSave }) {
     e.preventDefault();
 
     onSave?.(formData);
-    setMessage("Account information updated successfully!");
+    setMessage(t("Account information updated successfully!"));
   };
 
   const inputClass =
@@ -45,11 +47,11 @@ function AccountSettings({ initialValues, onSave }) {
 
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Account Settings
+            {t("Account Settings")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Manage your personal account information.
+            {t("Manage your personal account information.")}
           </p>
         </div>
       </div>
@@ -62,7 +64,7 @@ function AccountSettings({ initialValues, onSave }) {
           {/* Full Name */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Full Name
+              {t("Full Name")}
             </label>
 
             <input
@@ -70,7 +72,7 @@ function AccountSettings({ initialValues, onSave }) {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              placeholder="Enter your full name"
+              placeholder={t("Enter your full name")}
               className={inputClass}
               required
             />
@@ -79,7 +81,7 @@ function AccountSettings({ initialValues, onSave }) {
           {/* Email */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Email Address
+              {t("Email Address")}
             </label>
 
             <input
@@ -87,7 +89,7 @@ function AccountSettings({ initialValues, onSave }) {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder={t("Enter your email")}
               className={inputClass}
               required
             />
@@ -96,7 +98,7 @@ function AccountSettings({ initialValues, onSave }) {
           {/* Phone */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Phone Number
+              {t("Phone Number")}
             </label>
 
             <input
@@ -104,7 +106,7 @@ function AccountSettings({ initialValues, onSave }) {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Enter your phone number"
+              placeholder={t("Enter your phone number")}
               className={inputClass}
             />
           </div>
@@ -112,7 +114,7 @@ function AccountSettings({ initialValues, onSave }) {
           {/* College */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              College / Institution
+              {t("College / Institution")}
             </label>
 
             <input
@@ -120,7 +122,7 @@ function AccountSettings({ initialValues, onSave }) {
               name="college"
               value={formData.college}
               onChange={handleChange}
-              placeholder="Enter your college name"
+              placeholder={t("Enter your college name")}
               className={inputClass}
             />
           </div>
@@ -128,7 +130,7 @@ function AccountSettings({ initialValues, onSave }) {
           {/* Course */}
           <div className="sm:col-span-2">
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Current Course
+              {t("Current Course")}
             </label>
 
             <select
@@ -137,7 +139,7 @@ function AccountSettings({ initialValues, onSave }) {
               onChange={handleChange}
               className={inputClass}
             >
-              <option value="">Select your course</option>
+              <option value="">{t("Select your course")}</option>
               <option value="BCA">BCA</option>
               <option value="BSc Computer Science">
                 BSc Computer Science
@@ -146,7 +148,7 @@ function AccountSettings({ initialValues, onSave }) {
               <option value="BA">BA</option>
               <option value="BCom">BCom</option>
               <option value="MCA">MCA</option>
-              <option value="Other">Other</option>
+              <option value="Other">{t("Other")}</option>
             </select>
           </div>
 
@@ -169,7 +171,7 @@ function AccountSettings({ initialValues, onSave }) {
             className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
           >
             <Save size={17} />
-            Save Changes
+            {t("Save Changes")}
           </button>
         </div>
 

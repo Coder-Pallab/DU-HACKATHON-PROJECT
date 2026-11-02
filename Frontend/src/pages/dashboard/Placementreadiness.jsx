@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { Target, BookOpen, Trophy, ClipboardCheck } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import PageHeader from "../../Components/layout/PageHeader";
 
@@ -44,6 +45,7 @@ const assessments = [
 ];
 
 function PlacementReadiness() {
+  const { t } = useLanguage();
   const [selectedAssessment, setSelectedAssessment] = useState(null);
 
   const stats = [
@@ -93,7 +95,7 @@ function PlacementReadiness() {
 
               <div>
                 <p className="text-sm text-gray-500">
-                  {stat.title}
+                  {t(stat.title, stat.title)}
                 </p>
 
                 <h3 className="mt-1 text-2xl font-bold text-gray-800">
@@ -117,11 +119,11 @@ function PlacementReadiness() {
       <section className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold text-gray-800">
-            Placement Assessments
+            {t("Placement Assessments")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Evaluate your skills through practice assessments.
+            {t("Evaluate your skills through practice assessments.")}
           </p>
         </div>
 
@@ -140,11 +142,11 @@ function PlacementReadiness() {
       {selectedAssessment && (
         <div className="rounded-xl border border-teal-200 bg-teal-50 p-4">
           <p className="text-sm font-medium text-teal-800">
-            {selectedAssessment.title} selected.
+            {t(selectedAssessment.title, selectedAssessment.title)} {t("selected.")}
           </p>
 
           <p className="mt-1 text-xs text-teal-700">
-            The assessment interface will be developed in a future step.
+            {t("The assessment interface will be developed in a future step.")}
           </p>
 
           <button
@@ -152,7 +154,7 @@ function PlacementReadiness() {
             onClick={() => setSelectedAssessment(null)}
             className="mt-3 text-sm font-semibold text-teal-800 hover:underline"
           >
-            Close
+            {t("Close")}
           </button>
         </div>
       )}
@@ -161,7 +163,7 @@ function PlacementReadiness() {
       <Suspense
         fallback={
           <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-500 shadow-sm">
-            Loading progress chart...
+            {t("Loading progress chart...")}
           </div>
         }
       >

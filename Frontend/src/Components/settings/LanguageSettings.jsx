@@ -1,28 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Languages, Check, Save } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
-function LanguageSettings({ initialLanguage = "en", onSave }) {
-  const [language, setLanguage] = useState(initialLanguage);
+function LanguageSettings({ initialLanguage, onSave }) {
+  const { language: currentLang, setLanguage: setGlobalLanguage, languages, t } = useLanguage();
+  const [selectedLang, setSelectedLang] = useState(initialLanguage || currentLang);
   const [message, setMessage] = useState("");
 
-  const languages = [
-    {
-      code: "en",
-      name: "English",
-      nativeName: "English",
-      description: "Continue using Disha in English.",
-    },
-    {
-      code: "as",
-      name: "Assamese",
-      nativeName: "অসমীয়া",
-      description: "অসমীয়া ভাষাত দিশা ব্যৱহাৰ কৰক।",
-    },
-  ];
+  useEffect(() => {
+    if (initialLanguage) {
+      setSelectedLang(initialLanguage);
+    } else {
+      setSelectedLang(currentLang);
+    }
+  }, [initialLanguage, currentLang]);
+
+  const languageDescriptions = {
+    en: "Continue using Disha in English.",
+    as: "অসমীয়া ভাষাত দিশা ব্যৱহাৰ কৰক।",
+  };
 
   const handleSave = () => {
-    onSave?.(language);
-    setMessage("Language preference saved successfully!");
+    setGlobalLanguage(selectedLang);
+    onSave?.(selectedLang);
+    setMessage(t("Language preference saved successfully!"));
   };
 
   return (
@@ -35,11 +36,11 @@ function LanguageSettings({ initialLanguage = "en", onSave }) {
 
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Language Settings
+            {t("Language Settings")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Choose your preferred language for Disha.
+            {t("Choose your preferred language for Disha.")}
           </p>
         </div>
       </div>
@@ -47,14 +48,14 @@ function LanguageSettings({ initialLanguage = "en", onSave }) {
       {/* Language Options */}
       <div className="space-y-4">
         {languages.map((item) => {
-          const isSelected = language === item.code;
+          const isSelected = selectedLang === item.code;
 
           return (
             <button
               key={item.code}
               type="button"
               onClick={() => {
-                setLanguage(item.code);
+                setSelectedLang(item.code);
                 setMessage("");
               }}
               aria-pressed={isSelected}
@@ -74,7 +75,7 @@ function LanguageSettings({ initialLanguage = "en", onSave }) {
                 </p>
 
                 <p className="mt-2 text-xs text-gray-500">
-                  {item.description}
+                  {languageDescriptions[item.code] || ""}
                 </p>
               </div>
 
@@ -110,7 +111,7 @@ function LanguageSettings({ initialLanguage = "en", onSave }) {
           className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
         >
           <Save size={17} />
-          Save Preference
+          {t("Save Preference")}
         </button>
       </div>
     </div>

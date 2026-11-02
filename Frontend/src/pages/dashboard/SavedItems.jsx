@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 import PageHeader from "../../Components/layout/PageHeader";
 import {
   Bookmark,
@@ -73,6 +74,7 @@ const initialSavedItems = [
 const categories = ["All", "Careers", "Jobs", "Courses"];
 
 function SavedItems() {
+  const { t } = useLanguage();
   const [savedItems, setSavedItems] = useState(initialSavedItems);
   const [activeCategory, setActiveCategory] = useState("All");
 
@@ -123,7 +125,7 @@ function SavedItems() {
 
                 <div>
                   <p className="text-sm text-gray-500">
-                    Saved {category}
+                    {t("Saved")} {t(category, category)}
                   </p>
 
                   <h3 className="mt-2 text-2xl font-bold text-gray-900">
@@ -150,17 +152,17 @@ function SavedItems() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Your Bookmarks
+              {t("Your Bookmarks")}
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
-              {savedItems.length} items saved in total
+              {savedItems.length} {t("items saved in total")}
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-teal-700">
             <Bookmark size={18} />
-            Saved Collection
+            {t("Saved Collection")}
           </div>
 
         </div>
@@ -179,7 +181,7 @@ function SavedItems() {
                   : "bg-gray-100 text-gray-600 hover:bg-teal-50 hover:text-teal-700"
               }`}
             >
-              {category}
+              {t(category, category)}
             </button>
           ))}
 
@@ -210,11 +212,11 @@ function SavedItems() {
 
                       <div className="min-w-0">
                         <span className="text-xs font-medium text-teal-700">
-                          {item.category}
+                          {t(item.category, item.category)}
                         </span>
 
                         <h3 className="mt-1 break-words font-semibold text-gray-900">
-                          {item.title}
+                          {t(item.title, item.title)}
                         </h3>
                       </div>
 
@@ -224,8 +226,8 @@ function SavedItems() {
                       type="button"
                       onClick={() => handleRemove(item.id)}
                       className="shrink-0 rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-                      aria-label={`Remove ${item.title}`}
-                      title="Remove saved item"
+                      aria-label={`${t("Remove")} ${t(item.title, item.title)}`}
+                      title={t("Remove saved item")}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -234,7 +236,7 @@ function SavedItems() {
 
                   {/* Description */}
                   <p className="mt-4 text-sm leading-6 text-gray-500">
-                    {item.description}
+                    {t(item.description, item.description)}
                   </p>
 
                   {/* Skills */}
@@ -257,7 +259,7 @@ function SavedItems() {
                     {item.location && (
                       <span className="flex items-center gap-1.5">
                         <MapPin size={14} />
-                        {item.location}
+                        {t(item.location, item.location)}
                       </span>
                     )}
 
@@ -271,12 +273,12 @@ function SavedItems() {
                     {item.duration && (
                       <span className="flex items-center gap-1.5">
                         <Clock size={14} />
-                        {item.duration}
+                        {t(item.duration, item.duration)}
                       </span>
                     )}
 
                     {item.type && (
-                      <span>{item.type}</span>
+                      <span>{t(item.type, item.type)}</span>
                     )}
 
                     {item.company && (
@@ -294,7 +296,7 @@ function SavedItems() {
                       }
                       className="flex items-center gap-2 text-sm font-semibold text-teal-700 transition hover:text-teal-900"
                     >
-                      View Details
+                      {t("View Details")}
                       <ExternalLink size={15} />
                     </button>
                   </div>
@@ -315,12 +317,11 @@ function SavedItems() {
             </div>
 
             <h3 className="mt-5 text-lg font-semibold text-gray-800">
-              No saved items found
+              {t("No saved items found")}
             </h3>
 
             <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
-              You haven't saved anything in this category yet.
-              Explore careers, jobs and courses to build your collection.
+              {t("You haven't saved anything in this category yet. Explore careers, jobs and courses to build your collection.")}
             </p>
 
             <button
@@ -328,7 +329,7 @@ function SavedItems() {
               onClick={() => setActiveCategory("All")}
               className="mt-5 rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800"
             >
-              View All Items
+              {t("View All Items")}
             </button>
 
           </div>

@@ -1,28 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Languages, Check } from "lucide-react";
 import Button from "../common/Button";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function LanguageSelector() {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const { language: currentGlobalLang, setLanguage, languages, t } = useLanguage();
+  const [selectedLanguage, setSelectedLanguage] = useState(currentGlobalLang);
 
-  const languages = [
-    {
-      code: "en",
-      name: "English",
-      nativeName: "English",
-      description: "Continue using Disha in English.",
-    },
-    {
-      code: "as",
-      name: "Assamese",
-      nativeName: "অসমীয়া",
-      description: "Disha ব্যৱহাৰ কৰক অসমীয়া ভাষাত।",
-    },
-  ];
+  useEffect(() => {
+    setSelectedLanguage(currentGlobalLang);
+  }, [currentGlobalLang]);
+
+  const descriptions = {
+    en: "Continue using Disha in English.",
+    as: "Disha ব্যৱহাৰ কৰক অসমীয়া ভাষাত।",
+  };
 
   const handleSubmit = () => {
-    console.log("Selected Language:", selectedLanguage);
-    alert("Language preference saved successfully!");
+    setLanguage(selectedLanguage);
+    alert(t("Language preference saved successfully!"));
   };
 
   return (
@@ -36,11 +32,11 @@ function LanguageSelector() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Language Preference
+            {t("Language Preference")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Choose your preferred language.
+            {t("Choose your preferred language.")}
           </p>
         </div>
       </div>
@@ -75,7 +71,7 @@ function LanguageSelector() {
             </p>
 
             <p className="mt-2 text-sm text-slate-600">
-              {language.description}
+              {descriptions[language.code] || ""}
             </p>
           </button>
         ))}
@@ -84,7 +80,7 @@ function LanguageSelector() {
       {/* Save Button */}
       <div className="mt-6 flex justify-end border-t border-slate-100 pt-5">
         <Button type="button" onClick={handleSubmit}>
-          Save Language
+          {t("Save Language")}
         </Button>
       </div>
     </div>

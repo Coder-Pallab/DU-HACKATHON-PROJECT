@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import PageHeader from "../../Components/layout/PageHeader";
 
@@ -90,6 +91,7 @@ const careers = [
 ];
 
 function CareerMatches() {
+  const { t } = useLanguage();
   const [selectedCareer, setSelectedCareer] = useState(null);
 
   const [filters, setFilters] = useState({
@@ -131,11 +133,11 @@ function CareerMatches() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-800">
-            Recommended Careers
+            {t("Recommended Careers")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Explore career paths that match your profile.
+            {t("Explore career paths that match your profile.")}
           </p>
         </div>
 
@@ -159,10 +161,10 @@ function CareerMatches() {
         ) : (
           <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
             <p className="font-medium text-slate-700">
-              No careers found.
+              {t("No careers found.")}
             </p>
             <p className="mt-2 text-sm text-slate-500">
-              Try changing your filters.
+              {t("Try changing your filters.")}
             </p>
           </div>
         )}
@@ -175,14 +177,14 @@ function CareerMatches() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-bold text-slate-800">
-              Career Details
+              {t("Career Details")}
             </h2>
 
             <button
               onClick={() => setSelectedCareer(null)}
               className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
             >
-              Close Details
+              {t("Close Details")}
             </button>
           </div>
 

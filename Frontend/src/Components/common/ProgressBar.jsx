@@ -1,3 +1,5 @@
+import { useLanguage } from "../../hooks/useLanguage";
+
 function ProgressBar({
   value = 0,
   color = "bg-teal-600",
@@ -5,6 +7,7 @@ function ProgressBar({
   label,
   className = ""
 }) {
+  const { t } = useLanguage();
   const progress = Math.min(100, Math.max(0, value));
 
   return (
@@ -12,7 +15,7 @@ function ProgressBar({
       {(showLabel || label) && (
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">
-            {label || "Progress"}
+            {t(label || "Progress", label || "Progress")}
           </span>
 
           {showLabel && (

@@ -7,6 +7,7 @@ import {
   BookOpen,
   Target,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function CareerDetails({
   career = {
@@ -35,6 +36,8 @@ function CareerDetails({
     ],
   },
 }) {
+  const { t } = useLanguage();
+
   return (
     <section className="w-full min-w-0 space-y-6">
 
@@ -48,17 +51,17 @@ function CareerDetails({
 
           <div>
             <h2 className="text-xl font-bold text-slate-800">
-              {career.title}
+              {t(career.title, career.title)}
             </h2>
 
             <p className="text-sm text-slate-500">
-              {career.category}
+              {t(career.category, career.category)}
             </p>
           </div>
         </div>
 
         <p className="text-sm leading-7 text-slate-600">
-          {career.description}
+          {t(career.description, career.description)}
         </p>
 
         {/* Career Statistics */}
@@ -66,7 +69,7 @@ function CareerDetails({
 
           <div className="rounded-xl bg-teal-50 p-4">
             <IndianRupee size={20} className="mb-2 text-teal-700" />
-            <p className="text-xs text-slate-500">Expected Salary</p>
+            <p className="text-xs text-slate-500">{t("Expected Salary")}</p>
             <h3 className="mt-1 font-semibold text-slate-800">
               {career.salary}
             </h3>
@@ -74,7 +77,7 @@ function CareerDetails({
 
           <div className="rounded-xl bg-teal-50 p-4">
             <BriefcaseBusiness size={20} className="mb-2 text-teal-700" />
-            <p className="text-xs text-slate-500">Experience</p>
+            <p className="text-xs text-slate-500">{t("Experience")}</p>
             <h3 className="mt-1 font-semibold text-slate-800">
               {career.experience}
             </h3>
@@ -82,17 +85,17 @@ function CareerDetails({
 
           <div className="rounded-xl bg-teal-50 p-4">
             <TrendingUp size={20} className="mb-2 text-teal-700" />
-            <p className="text-xs text-slate-500">Growth Potential</p>
+            <p className="text-xs text-slate-500">{t("Growth Potential")}</p>
             <h3 className="mt-1 font-semibold text-slate-800">
-              {career.growth}
+              {t(career.growth, career.growth)}
             </h3>
           </div>
 
           <div className="rounded-xl bg-teal-50 p-4">
             <GraduationCap size={20} className="mb-2 text-teal-700" />
-            <p className="text-xs text-slate-500">Qualification</p>
+            <p className="text-xs text-slate-500">{t("Qualification")}</p>
             <h3 className="mt-1 text-sm font-semibold text-slate-800">
-              {career.qualification}
+              {t(career.qualification, career.qualification)}
             </h3>
           </div>
 
@@ -106,7 +109,7 @@ function CareerDetails({
           <Target size={22} className="text-teal-700" />
 
           <h3 className="text-lg font-semibold text-slate-800">
-            Required Skills
+            {t("Required Skills")}
           </h3>
         </div>
 
@@ -130,7 +133,7 @@ function CareerDetails({
           <BriefcaseBusiness size={22} className="text-teal-700" />
 
           <h3 className="text-lg font-semibold text-slate-800">
-            Key Responsibilities
+            {t("Key Responsibilities")}
           </h3>
         </div>
 
@@ -143,7 +146,7 @@ function CareerDetails({
               />
 
               <p className="text-sm leading-relaxed text-slate-600">
-                {item}
+                {t(item, item)}
               </p>
             </div>
           ))}
@@ -157,7 +160,7 @@ function CareerDetails({
           <BookOpen size={22} className="text-teal-700" />
 
           <h3 className="text-lg font-semibold text-slate-800">
-            Suggested Learning Path
+            {t("Suggested Learning Path")}
           </h3>
         </div>
 
@@ -170,7 +173,7 @@ function CareerDetails({
               </div>
 
               <p className="pt-1 text-sm leading-relaxed text-slate-600">
-                {step}
+                {t(step, step)}
               </p>
 
             </div>

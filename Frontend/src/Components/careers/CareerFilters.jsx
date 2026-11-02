@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { SlidersHorizontal, RotateCcw } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function CareerFilters({ onFilterChange }) {
+  const { t } = useLanguage();
+
   const initialFilters = {
     category: "All Categories",
     salary: "Any Salary",
@@ -19,8 +22,6 @@ function CareerFilters({ onFilterChange }) {
     };
 
     setFilters(updatedFilters);
-
-    // Send selected filters to the parent component.
     onFilterChange?.(updatedFilters);
   };
 
@@ -41,11 +42,11 @@ function CareerFilters({ onFilterChange }) {
 
           <div>
             <h2 className="font-semibold text-slate-800">
-              Filter Careers
+              {t("Filter Careers")}
             </h2>
 
             <p className="text-sm text-slate-500">
-              Find careers that match your preferences.
+              {t("Find careers that match your preferences.")}
             </p>
           </div>
         </div>
@@ -56,7 +57,7 @@ function CareerFilters({ onFilterChange }) {
           className="flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-900"
         >
           <RotateCcw size={15} />
-          Reset Filters
+          {t("Reset Filters")}
         </button>
       </div>
 
@@ -69,7 +70,7 @@ function CareerFilters({ onFilterChange }) {
             htmlFor="category"
             className="mb-2 block text-sm font-medium text-slate-700"
           >
-            Career Category
+            {t("Career Category")}
           </label>
 
           <select
@@ -79,12 +80,12 @@ function CareerFilters({ onFilterChange }) {
             onChange={handleChange}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           >
-            <option>All Categories</option>
-            <option>Technology</option>
-            <option>Design</option>
-            <option>Data Science</option>
-            <option>Business</option>
-            <option>Marketing</option>
+            <option value="All Categories">{t("All Categories")}</option>
+            <option value="Technology">{t("Technology")}</option>
+            <option value="Design">{t("Design")}</option>
+            <option value="Data Science">{t("Data Science")}</option>
+            <option value="Business">{t("Business")}</option>
+            <option value="Marketing">{t("Marketing")}</option>
           </select>
         </div>
 
@@ -94,7 +95,7 @@ function CareerFilters({ onFilterChange }) {
             htmlFor="salary"
             className="mb-2 block text-sm font-medium text-slate-700"
           >
-            Expected Salary
+            {t("Expected Salary")}
           </label>
 
           <select
@@ -104,11 +105,11 @@ function CareerFilters({ onFilterChange }) {
             onChange={handleChange}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           >
-            <option>Any Salary</option>
-            <option>Below ₹3 LPA</option>
-            <option>₹3–5 LPA</option>
-            <option>₹5–10 LPA</option>
-            <option>Above ₹10 LPA</option>
+            <option value="Any Salary">{t("Any Salary")}</option>
+            <option value="Below ₹3 LPA">{t("Below ₹3 LPA")}</option>
+            <option value="₹3–5 LPA">{t("₹3–5 LPA")}</option>
+            <option value="₹5–10 LPA">{t("₹5–10 LPA")}</option>
+            <option value="Above ₹10 LPA">{t("Above ₹10 LPA")}</option>
           </select>
         </div>
 
@@ -118,7 +119,7 @@ function CareerFilters({ onFilterChange }) {
             htmlFor="experience"
             className="mb-2 block text-sm font-medium text-slate-700"
           >
-            Experience Level
+            {t("Experience Level")}
           </label>
 
           <select
@@ -128,11 +129,11 @@ function CareerFilters({ onFilterChange }) {
             onChange={handleChange}
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           >
-            <option>Any Experience</option>
-            <option>Fresher</option>
-            <option>0–2 Years</option>
-            <option>2–5 Years</option>
-            <option>5+ Years</option>
+            <option value="Any Experience">{t("Any Experience")}</option>
+            <option value="Fresher">{t("Fresher")}</option>
+            <option value="0–2 Years">{t("0–2 Years")}</option>
+            <option value="2–5 Years">{t("2–5 Years")}</option>
+            <option value="5+ Years">{t("5+ Years")}</option>
           </select>
         </div>
 

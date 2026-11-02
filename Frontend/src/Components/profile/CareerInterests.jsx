@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 
 import Button from "../common/Button";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function CareerInterests() {
+  const { t } = useLanguage();
   const [selectedInterests, setSelectedInterests] = useState([]);
 
   const careerOptions = [
@@ -70,7 +72,7 @@ function CareerInterests() {
 
   const handleSubmit = () => {
     console.log("Selected Career Interests:", selectedInterests);
-    alert("Career interests saved successfully!");
+    alert(t("Career interests saved successfully!"));
   };
 
   return (
@@ -79,23 +81,22 @@ function CareerInterests() {
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-slate-800">
-          Career Interests
+          {t("Career Interests")}
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Select the career fields that interest you.
-          You can choose multiple options.
+          {t("Select the career fields that interest you. You can choose multiple options.")}
         </p>
       </div>
 
       {/* Selected Count */}
       <div className="mb-5 flex items-center justify-between">
         <span className="text-sm font-medium text-slate-700">
-          Available Career Fields
+          {t("Available Career Fields")}
         </span>
 
         <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
-          {selectedInterests.length} Selected
+          {selectedInterests.length} {t("Selected")}
         </span>
       </div>
 
@@ -126,11 +127,11 @@ function CareerInterests() {
               {/* Content */}
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-800">
-                  {career.name}
+                  {t(career.name, career.name)}
                 </h3>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  {career.description}
+                  {t(career.description, career.description)}
                 </p>
               </div>
 
@@ -153,7 +154,7 @@ function CareerInterests() {
           onClick={handleSubmit}
           disabled={selectedInterests.length === 0}
         >
-          Save Interests
+          {t("Save Interests")}
         </Button>
       </div>
 

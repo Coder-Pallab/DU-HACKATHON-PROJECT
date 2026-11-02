@@ -2,10 +2,12 @@ import { ArrowUpRight, BriefcaseBusiness } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import Badge from "../common/Badges";
-
+import { useLanguage } from "../../hooks/useLanguage";
 import { careers } from "../../data/careers";
 
 function CareerOverview() {
+  const { t } = useLanguage();
+
   return (
     <section>
 
@@ -13,11 +15,11 @@ function CareerOverview() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-900">
-            Recommended Careers
+            {t("Recommended Careers")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Explore career paths that match your interests.
+            {t("Explore career paths that match your interests.")}
           </p>
         </div>
 
@@ -25,7 +27,7 @@ function CareerOverview() {
           to="/dashboard/careers"
           className="flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-900"
         >
-          View All
+          {t("View All")}
           <ArrowUpRight size={17} />
         </Link>
 
@@ -47,27 +49,27 @@ function CareerOverview() {
               </div>
 
               <Badge variant="success">
-                {career.match}% Match
+                {career.match}% {t("Match")}
               </Badge>
 
             </div>
 
             <h3 className="mt-4 text-lg font-bold text-slate-900">
-              {career.title}
+              {t(career.title, career.title)}
             </h3>
 
             <p className="mt-1 text-xs font-medium text-teal-700">
-              {career.category}
+              {t(career.category, career.category)}
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              {career.description}
+              {t(career.description, career.description)}
             </p>
 
             <div className="mt-4">
 
               <p className="text-xs font-semibold text-slate-500">
-                REQUIRED SKILLS
+                {t("REQUIRED SKILLS")}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
@@ -88,7 +90,7 @@ function CareerOverview() {
             <div className="mt-5 border-t border-slate-100 pt-4">
 
               <p className="text-xs text-slate-500">
-                Estimated Salary
+                {t("Estimated Salary")}
               </p>
 
               <p className="mt-1 font-semibold text-slate-800">

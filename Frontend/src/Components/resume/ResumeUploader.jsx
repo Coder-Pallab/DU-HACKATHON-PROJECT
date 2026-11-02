@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { Upload, X, FileCheck2 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ResumeUploader({ file, onFileChange }) {
+  const { t } = useLanguage();
   const inputRef = useRef(null);
   const [error, setError] = useState("");
 
@@ -13,13 +15,13 @@ function ResumeUploader({ file, onFileChange }) {
     const allowedExtensions = /\.(pdf|doc|docx)$/i;
 
     if (!allowedExtensions.test(selectedFile.name)) {
-      setError("Please select a PDF, DOC or DOCX file.");
+      setError(t("Please select a PDF, DOC or DOCX file."));
       event.target.value = "";
       return;
     }
 
     if (selectedFile.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5 MB.");
+      setError(t("File size must be less than 5 MB."));
       event.target.value = "";
       return;
     }
@@ -48,11 +50,11 @@ function ResumeUploader({ file, onFileChange }) {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Upload Your Resume
+            {t("Upload Your Resume")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Upload your resume to get started.
+            {t("Upload your resume to get started.")}
           </p>
         </div>
       </div>
@@ -74,11 +76,11 @@ function ResumeUploader({ file, onFileChange }) {
           <Upload size={32} className="mb-3 text-teal-600" />
 
           <span className="font-semibold text-slate-700">
-            Click to upload your resume
+            {t("Click to upload your resume")}
           </span>
 
           <span className="mt-2 text-xs text-slate-500">
-            PDF, DOC or DOCX · Maximum 5 MB
+            {t("PDF, DOC or DOCX · Maximum 5 MB")}
           </span>
         </button>
       ) : (
@@ -100,8 +102,8 @@ function ResumeUploader({ file, onFileChange }) {
           <button
             type="button"
             onClick={removeFile}
-            aria-label="Remove resume"
-            className="shrink-0 rounded-lg p-2 text-red-500 hover:bg-red-50"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-teal-100 hover:text-slate-700"
+            aria-label={t("Remove file")}
           >
             <X size={18} />
           </button>
@@ -109,10 +111,11 @@ function ResumeUploader({ file, onFileChange }) {
       )}
 
       {error && (
-        <p className="mt-3 text-sm text-red-600" role="alert">
+        <p className="mt-3 text-xs font-medium text-red-600">
           {error}
         </p>
       )}
+
     </section>
   );
 }

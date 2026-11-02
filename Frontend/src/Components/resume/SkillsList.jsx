@@ -1,7 +1,10 @@
 import { Code2 } from "lucide-react";
 import SkillCard from "./SkillCard";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function SkillsList() {
+  const { t } = useLanguage();
+
   const skills = [
     {
       id: 1,
@@ -52,11 +55,11 @@ function SkillsList() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Extracted Skills
+            {t("Extracted Skills")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Overview of your technical skills and proficiency.
+            {t("Overview of your technical skills and proficiency.")}
           </p>
         </div>
       </div>
@@ -76,8 +79,8 @@ function SkillsList() {
       {/* Footer */}
       <div className="mt-6 rounded-xl bg-teal-50 p-4">
         <p className="text-sm leading-relaxed text-teal-800">
-          <strong>Tip:</strong> Keep developing your skills through
-          practical projects and consistent learning.
+          <strong>{t("Tip:")}</strong>{" "}
+          {t("Keep developing your skills through practical projects and consistent learning.")}
         </p>
       </div>
 

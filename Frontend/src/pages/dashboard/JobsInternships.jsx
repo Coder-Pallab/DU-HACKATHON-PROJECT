@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { X, BriefcaseBusiness, Bookmark } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import PageHeader from "../../Components/layout/PageHeader";
 
@@ -96,16 +97,12 @@ const initialFilters = {
 };
 
 function JobsInternships() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
-
   const [filters, setFilters] = useState(initialFilters);
-
   const [savedJobs, setSavedJobs] = useState([]);
-
   const [applications, setApplications] = useState([]);
-
   const [selectedJob, setSelectedJob] = useState(null);
-
   const [selectedApplication, setSelectedApplication] = useState(null);
 
   // Search and Filter Jobs
@@ -212,7 +209,7 @@ function JobsInternships() {
 
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">
-            Available Opportunities
+            {t("Available Opportunities")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -222,7 +219,7 @@ function JobsInternships() {
 
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">
-            Saved Jobs
+            {t("Saved Jobs")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold text-teal-700">
@@ -232,7 +229,7 @@ function JobsInternships() {
 
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">
-            Applied Jobs
+            {t("Applied Jobs")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold text-blue-600">
@@ -258,17 +255,17 @@ function JobsInternships() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Explore Opportunities
+              {t("Explore Opportunities")}
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
-              {filteredJobs.length} opportunities found
+              {filteredJobs.length} {t("opportunities found")}
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <BriefcaseBusiness size={17} />
-            Latest Opportunities
+            {t("Latest Opportunities")}
           </div>
         </div>
 
@@ -294,11 +291,11 @@ function JobsInternships() {
             />
 
             <h3 className="mt-3 font-semibold text-gray-800">
-              No opportunities found
+              {t("No opportunities found")}
             </h3>
 
             <p className="mt-1 text-sm text-gray-500">
-              Try changing your search or filters.
+              {t("Try changing your search or filters.")}
             </p>
 
             <button
@@ -306,7 +303,7 @@ function JobsInternships() {
               onClick={handleResetFilters}
               className="mt-4 text-sm font-semibold text-teal-700 hover:text-teal-900"
             >
-              Clear Filters
+              {t("Clear Filters")}
             </button>
           </div>
         )}
@@ -320,7 +317,7 @@ function JobsInternships() {
             <Bookmark size={19} className="text-teal-700" />
 
             <h2 className="text-lg font-semibold text-gray-900">
-              Saved Opportunities
+              {t("Saved Opportunities")}
             </h2>
           </div>
 
@@ -365,7 +362,7 @@ function JobsInternships() {
                 type="button"
                 onClick={() => setSelectedJob(null)}
                 className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
-                aria-label="Close job details"
+                aria-label={t("Close job details")}
               >
                 <X size={20} />
               </button>
@@ -374,44 +371,44 @@ function JobsInternships() {
             <div className="my-5 space-y-3 text-sm text-gray-600">
 
               <p>
-                <strong>Location:</strong> {selectedJob.location}
+                <strong>{t("Location:")}</strong> {t(selectedJob.location, selectedJob.location)}
               </p>
 
               <p>
-                <strong>Job Type:</strong> {selectedJob.type}
+                <strong>{t("Job Type:")}</strong> {t(selectedJob.type, selectedJob.type)}
               </p>
 
               <p>
-                <strong>Work Mode:</strong> {selectedJob.mode}
+                <strong>{t("Work Mode:")}</strong> {t(selectedJob.mode, selectedJob.mode)}
               </p>
 
               <p>
-                <strong>Salary:</strong> {selectedJob.salary}
+                <strong>{t("Salary:")}</strong> {selectedJob.salary}
               </p>
 
               <p>
-                <strong>Experience:</strong> {selectedJob.experience}
+                <strong>{t("Experience:")}</strong> {t(selectedJob.experience, selectedJob.experience)}
               </p>
 
               <p>
-                <strong>Deadline:</strong> {selectedJob.deadline}
+                <strong>{t("Deadline:")}</strong> {selectedJob.deadline}
               </p>
 
             </div>
 
             <div>
               <h3 className="font-semibold text-gray-900">
-                Job Description
+                {t("Job Description")}
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                {selectedJob.description}
+                {t(selectedJob.description, selectedJob.description)}
               </p>
             </div>
 
             <div className="mt-5">
               <h3 className="font-semibold text-gray-900">
-                Required Skills
+                {t("Required Skills")}
               </h3>
 
               <div className="mt-2 flex flex-wrap gap-2">
@@ -436,11 +433,11 @@ function JobsInternships() {
                   : "bg-teal-700 hover:bg-teal-800"
               }`}
             >
-              {hasApplied ? "Already Applied" : "Apply Now"}
+              {hasApplied ? t("Already Applied") : t("Apply Now")}
             </button>
 
             <p className="mt-2 text-center text-xs text-gray-400">
-              Demo only — no application is sent to an employer.
+              {t("Demo only — no application is sent to an employer.")}
             </p>
 
           </div>
@@ -455,13 +452,13 @@ function JobsInternships() {
 
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-bold text-gray-900">
-                Application Details
+                {t("Application Details")}
               </h2>
 
               <button
                 type="button"
                 onClick={() => setSelectedApplication(null)}
-                aria-label="Close application details"
+                aria-label={t("Close application details")}
                 className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
               >
                 <X size={20} />
@@ -470,20 +467,20 @@ function JobsInternships() {
 
             <div className="mt-5 space-y-3 text-sm text-gray-600">
               <p>
-                <strong>Position:</strong> {selectedApplication.title}
+                <strong>{t("Position:")}</strong> {selectedApplication.title}
               </p>
 
               <p>
-                <strong>Company:</strong> {selectedApplication.company}
+                <strong>{t("Company:")}</strong> {selectedApplication.company}
               </p>
 
               <p>
-                <strong>Applied Date:</strong>{" "}
+                <strong>{t("Applied Date:")}</strong>{" "}
                 {selectedApplication.appliedDate}
               </p>
 
               <p>
-                <strong>Status:</strong> {selectedApplication.status}
+                <strong>{t("Status:")}</strong> {t(selectedApplication.status, selectedApplication.status)}
               </p>
             </div>
 
@@ -492,7 +489,7 @@ function JobsInternships() {
               onClick={() => setSelectedApplication(null)}
               className="mt-6 w-full rounded-lg bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800"
             >
-              Close
+              {t("Close")}
             </button>
 
           </div>

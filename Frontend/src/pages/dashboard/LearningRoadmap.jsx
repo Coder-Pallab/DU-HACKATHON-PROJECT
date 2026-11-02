@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import PageHeader from "../../Components/layout/PageHeader";
 
@@ -120,6 +121,7 @@ const courses = [
 ];
 
 function LearningRoadmap() {
+  const { t } = useLanguage();
   const [selectedRoadmap, setSelectedRoadmap] = useState(roadmaps[0]);
 
   return (
@@ -136,11 +138,11 @@ function LearningRoadmap() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-800">
-            Explore Learning Paths
+            {t("Explore Learning Paths")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Choose a career path and start developing relevant skills.
+            {t("Choose a career path and start developing relevant skills.")}
           </p>
         </div>
 
@@ -164,11 +166,11 @@ function LearningRoadmap() {
 
             <div>
               <h2 className="text-xl font-bold text-slate-800">
-                {selectedRoadmap.title} Roadmap
+                {t(selectedRoadmap.title, selectedRoadmap.title)} {t("Roadmap")}
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Follow the milestones to achieve your learning goals.
+                {t("Follow the milestones to achieve your learning goals.")}
               </p>
             </div>
 
@@ -181,11 +183,11 @@ function LearningRoadmap() {
 
             <div>
               <h2 className="text-xl font-bold text-slate-800">
-                Current Learning Milestone
+                {t("Current Learning Milestone")}
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Complete individual topics and track your learning progress.
+                {t("Complete individual topics and track your learning progress.")}
               </p>
             </div>
 
@@ -211,11 +213,11 @@ function LearningRoadmap() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-800">
-            Recommended Courses
+            {t("Recommended Courses")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Explore courses that can help you develop your skills.
+            {t("Explore courses that can help you develop your skills.")}
           </p>
         </div>
 

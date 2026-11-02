@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import {
   LayoutDashboard,
@@ -9,22 +10,26 @@ import {
 
 const mobileLinks = [
   {
+    nameKey: "sidebar.dashboard",
     name: "Home",
     path: "/dashboard",
     icon: LayoutDashboard,
     end: true,
   },
   {
+    nameKey: "sidebar.careerMatches",
     name: "Careers",
     path: "/dashboard/careers",
     icon: BriefcaseBusiness,
   },
   {
+    nameKey: "sidebar.learningRoadmap",
     name: "Roadmap",
     path: "/dashboard/roadmap",
     icon: BookOpen,
   },
   {
+    nameKey: "sidebar.myProfile",
     name: "Profile",
     path: "/dashboard/profile",
     icon: UserRound,
@@ -32,6 +37,8 @@ const mobileLinks = [
 ];
 
 function MobileNavigation() {
+  const { t } = useLanguage();
+
   return (
     <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] lg:hidden">
 
@@ -54,7 +61,7 @@ function MobileNavigation() {
               }
             >
               <Icon size={21} />
-              <span>{item.name}</span>
+              <span>{t(item.nameKey, item.name)}</span>
             </NavLink>
           );
         })}

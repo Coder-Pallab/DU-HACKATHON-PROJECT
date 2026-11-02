@@ -1,7 +1,10 @@
 import { Award, TrendingUp, AlertCircle } from "lucide-react";
 import ProgressBar from "../common/ProgressBar";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ResumeScore({ score = 78 }) {
+  const { t } = useLanguage();
+
   const categories = [
     {
       name: "Formatting",
@@ -39,11 +42,11 @@ function ResumeScore({ score = 78 }) {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Resume Score
+            {t("Resume Score")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Your resume performance overview.
+            {t("Your resume performance overview.")}
           </p>
         </div>
       </div>
@@ -57,23 +60,23 @@ function ResumeScore({ score = 78 }) {
           </span>
 
           <span className="text-xs text-slate-500">
-            Out of 100
+            {t("Out of 100")}
           </span>
         </div>
 
         <span className="mt-4 rounded-full bg-white px-4 py-1 text-sm font-semibold text-teal-700">
-          {getScoreLabel(score)}
+          {t(getScoreLabel(score))}
         </span>
 
         <p className="mt-2 text-center text-sm text-slate-600">
-          Keep improving your resume to increase your career opportunities.
+          {t("Keep improving your resume to increase your career opportunities.")}
         </p>
       </div>
 
       {/* Category Breakdown */}
       <div>
         <h3 className="mb-5 font-semibold text-slate-800">
-          Score Breakdown
+          {t("Score Breakdown")}
         </h3>
 
         <div className="space-y-5">
@@ -82,7 +85,7 @@ function ResumeScore({ score = 78 }) {
 
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-700">
-                  {category.name}
+                  {t(category.name, category.name)}
                 </span>
 
                 <span className="text-sm font-semibold text-slate-800">
@@ -90,7 +93,7 @@ function ResumeScore({ score = 78 }) {
                 </span>
               </div>
 
-              <ProgressBar value={category.score} />
+              <ProgressBar value={category.score} showLabel={false} />
 
             </div>
           ))}
@@ -104,11 +107,11 @@ function ResumeScore({ score = 78 }) {
 
         <div>
           <h4 className="text-sm font-semibold text-amber-800">
-            Room for Improvement
+            {t("Room for Improvement")}
           </h4>
 
           <p className="mt-1 text-xs leading-relaxed text-amber-700">
-            Focus on improving your experience section to strengthen your resume.
+            {t("Focus on improving your experience section to strengthen your resume.")}
           </p>
         </div>
 
@@ -117,7 +120,7 @@ function ResumeScore({ score = 78 }) {
       {/* Footer */}
       <div className="mt-5 flex items-center gap-2 text-xs text-slate-500">
         <TrendingUp size={15} className="text-teal-600" />
-        Resume improvement insights
+        {t("Resume improvement insights")}
       </div>
 
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sparkles, Bot } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import PageHeader from "../../Components/layout/PageHeader";
 import ChatWindow from "../../Components/counsellor/ChatWindow";
@@ -16,6 +17,7 @@ const initialMessages = [
 ];
 
 function AICounsellor() {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState(initialMessages);
   const [isTyping, setIsTyping] = useState(false);
 
@@ -69,19 +71,18 @@ function AICounsellor() {
 
           <div>
             <h2 className="text-lg font-semibold sm:text-xl">
-              Your Personal Career Guide
+              {t("Your Personal Career Guide")}
             </h2>
 
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-teal-50">
-              Explore career paths, understand required skills and discover
-              learning opportunities.
+              {t("Explore career paths, understand required skills and discover learning opportunities.")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-teal-50">
           <span className="h-2 w-2 rounded-full bg-green-300" />
-          <span>Demo Mode</span>
+          <span>{t("Demo Mode")}</span>
         </div>
       </div>
 
@@ -94,11 +95,11 @@ function AICounsellor() {
 
           <div>
             <h3 className="text-sm font-semibold text-gray-800">
-              Disha AI Assistant
+              {t("Disha AI Assistant")}
             </h3>
 
             <p className="text-xs text-green-600">
-              Career guidance assistant
+              {t("Career guidance assistant")}
             </p>
           </div>
         </div>
@@ -120,8 +121,7 @@ function AICounsellor() {
       )}
 
       <p className="text-center text-xs text-gray-400">
-        Disha AI Counsellor is currently running in frontend demo mode.
-        Responses are predefined sample messages.
+        {t("Disha AI Counsellor is currently running in frontend demo mode. Responses are predefined sample messages.")}
       </p>
     </div>
   );

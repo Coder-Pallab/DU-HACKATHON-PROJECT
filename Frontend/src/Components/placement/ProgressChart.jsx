@@ -10,6 +10,7 @@ import {
 } from "recharts";
 
 import { TrendingUp, ChartLine } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const progressData = [
   {
@@ -51,6 +52,13 @@ const progressData = [
 ];
 
 function ProgressChart() {
+  const { t } = useLanguage();
+
+  const localizedData = progressData.map((item) => ({
+    ...item,
+    week: t(item.week, item.week),
+  }));
+
   return (
     <div className="w-full min-w-0 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
       {/* Header */}
@@ -62,18 +70,18 @@ function ProgressChart() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
-              Preparation Progress
+              {t("Preparation Progress")}
             </h2>
 
             <p className="text-sm text-gray-500">
-              Track your weekly improvement.
+              {t("Track your weekly improvement.")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-sm font-medium text-green-600">
           <TrendingUp size={17} />
-          <span>6 weeks overview</span>
+          <span>{t("6 weeks overview")}</span>
         </div>
       </div>
 
@@ -81,7 +89,7 @@ function ProgressChart() {
       <div className="h-[280px] w-full min-w-0 sm:h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={progressData}
+            data={localizedData}
             margin={{
               top: 10,
               right: 10,
@@ -126,7 +134,7 @@ function ProgressChart() {
             <Line
               type="monotone"
               dataKey="technical"
-              name="Technical Skills"
+              name={t("Technical Skills")}
               stroke="#0f766e"
               strokeWidth={3}
               dot={{ r: 4 }}
@@ -136,7 +144,7 @@ function ProgressChart() {
             <Line
               type="monotone"
               dataKey="aptitude"
-              name="Aptitude"
+              name={t("Aptitude")}
               stroke="#f59e0b"
               strokeWidth={3}
               dot={{ r: 4 }}
@@ -145,7 +153,7 @@ function ProgressChart() {
             <Line
               type="monotone"
               dataKey="communication"
-              name="Communication"
+              name={t("Communication")}
               stroke="#6366f1"
               strokeWidth={3}
               dot={{ r: 4 }}
@@ -155,7 +163,7 @@ function ProgressChart() {
       </div>
 
       <p className="mt-4 border-t border-gray-100 pt-4 text-xs text-gray-400">
-        Sample progress data for frontend demonstration.
+        {t("Sample progress data for frontend demonstration.")}
       </p>
     </div>
   );

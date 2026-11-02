@@ -1,3 +1,5 @@
+import { useLanguage } from "../../hooks/useLanguage";
+
 function Input({
   label,
   name,
@@ -11,6 +13,8 @@ function Input({
   className = "",
   ...props
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="w-full">
       {label && (
@@ -18,7 +22,7 @@ function Input({
           htmlFor={name}
           className="mb-2 block text-sm font-medium text-gray-700"
         >
-          {label}
+          {typeof label === "string" ? t(label, label) : label}
 
           {required && (
             <span className="ml-1 text-red-500">*</span>
@@ -30,7 +34,7 @@ function Input({
         id={name}
         name={name}
         type={type}
-        placeholder={placeholder}
+        placeholder={typeof placeholder === "string" ? t(placeholder, placeholder) : placeholder}
         value={value}
         onChange={onChange}
         required={required}
@@ -46,13 +50,13 @@ function Input({
 
       {error && (
         <p className="mt-1 text-sm text-red-500">
-          {error}
+          {typeof error === "string" ? t(error, error) : error}
         </p>
       )}
 
       {!error && helperText && (
         <p className="mt-1 text-xs text-gray-500">
-          {helperText}
+          {typeof helperText === "string" ? t(helperText, helperText) : helperText}
         </p>
       )}
     </div>

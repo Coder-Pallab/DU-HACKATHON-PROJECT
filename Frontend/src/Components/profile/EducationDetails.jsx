@@ -2,8 +2,10 @@ import { useState } from "react";
 import { GraduationCap } from "lucide-react";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function EducationDetails() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     educationLevel: "",
     institution: "",
@@ -25,7 +27,7 @@ function EducationDetails() {
     e.preventDefault();
 
     console.log("Education Details:", formData);
-    alert("Education details saved successfully!");
+    alert(t("Education details saved successfully!"));
   };
 
   return (
@@ -39,11 +41,11 @@ function EducationDetails() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Education Details
+            {t("Education Details")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Tell us about your academic background.
+            {t("Tell us about your academic background.")}
           </p>
         </div>
       </div>
@@ -59,7 +61,7 @@ function EducationDetails() {
               htmlFor="educationLevel"
               className="text-sm font-medium text-slate-700"
             >
-              Education Level
+              {t("Education Level")}
             </label>
 
             <select
@@ -70,13 +72,13 @@ function EducationDetails() {
               required
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
             >
-              <option value="">Select education level</option>
-              <option value="10th">10th Standard</option>
-              <option value="12th">12th Standard</option>
-              <option value="diploma">Diploma</option>
-              <option value="undergraduate">Undergraduate</option>
-              <option value="postgraduate">Postgraduate</option>
-              <option value="other">Other</option>
+              <option value="">{t("Select education level")}</option>
+              <option value="10th">{t("10th Standard")}</option>
+              <option value="12th">{t("12th Standard")}</option>
+              <option value="diploma">{t("Diploma")}</option>
+              <option value="undergraduate">{t("Undergraduate")}</option>
+              <option value="postgraduate">{t("Postgraduate")}</option>
+              <option value="other">{t("Other")}</option>
             </select>
           </div>
 
@@ -120,7 +122,7 @@ function EducationDetails() {
         {/* Submit Button */}
         <div className="flex justify-end border-t border-slate-100 pt-5">
           <Button type="submit">
-            Save Education
+            {t("Save Education")}
           </Button>
         </div>
 

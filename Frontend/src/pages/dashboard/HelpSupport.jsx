@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 import PageHeader from "../../Components/layout/PageHeader";
 import {
   Search,
@@ -103,6 +104,7 @@ const categories = [
 ];
 
 function HelpSupport() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFaq, setActiveFaq] = useState(null);
 
@@ -140,7 +142,7 @@ function HelpSupport() {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      alert("Please fill in all required fields.");
+      alert(t("Please fill in all required fields."));
       return;
     }
 
@@ -174,12 +176,11 @@ function HelpSupport() {
           </div>
 
           <h2 className="text-2xl font-bold sm:text-3xl">
-            How can we help you?
+            {t("How can we help you?")}
           </h2>
 
           <p className="mt-3 text-sm leading-6 text-teal-100 sm:text-base">
-            Explore our help center to find answers about your account,
-            career guidance, learning roadmap and more.
+            {t("Explore our help center to find answers about your account, career guidance, learning roadmap and more.")}
           </p>
 
           <div className="mt-6 flex items-center gap-3 rounded-xl bg-white px-4 py-3">
@@ -188,7 +189,7 @@ function HelpSupport() {
 
             <input
               type="text"
-              placeholder="Search your questions..."
+              placeholder={t("Search your questions...")}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -207,11 +208,11 @@ function HelpSupport() {
 
         <div className="mb-5">
           <h2 className="text-lg font-semibold text-gray-900">
-            Browse Help Topics
+            {t("Browse Help Topics")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Find assistance based on your requirements.
+            {t("Find assistance based on your requirements.")}
           </p>
         </div>
 
@@ -231,11 +232,11 @@ function HelpSupport() {
                 </div>
 
                 <h3 className="font-semibold text-gray-900">
-                  {category.title}
+                  {t(category.title, category.title)}
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-gray-500">
-                  {category.description}
+                  {t(category.description, category.description)}
                 </p>
 
               </div>
@@ -250,11 +251,11 @@ function HelpSupport() {
 
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900">
-            Frequently Asked Questions
+            {t("Frequently Asked Questions")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Find quick answers to common questions.
+            {t("Find quick answers to common questions.")}
           </p>
         </div>
 
@@ -281,11 +282,11 @@ function HelpSupport() {
 
                     <div>
                       <span className="mb-2 inline-block rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">
-                        {faq.category}
+                        {t(faq.category, faq.category)}
                       </span>
 
                       <h3 className="text-sm font-semibold leading-6 text-gray-800">
-                        {faq.question}
+                        {t(faq.question, faq.question)}
                       </h3>
                     </div>
 
@@ -306,7 +307,7 @@ function HelpSupport() {
                   {isOpen && (
                     <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 sm:px-5">
                       <p className="text-sm leading-7 text-gray-600">
-                        {faq.answer}
+                        {t(faq.answer, faq.answer)}
                       </p>
                     </div>
                   )}
@@ -324,11 +325,11 @@ function HelpSupport() {
               />
 
               <h3 className="mt-3 font-semibold text-gray-800">
-                No matching questions
+                {t("No matching questions")}
               </h3>
 
               <p className="mt-2 text-sm text-gray-500">
-                Try searching with a different keyword.
+                {t("Try searching with a different keyword.")}
               </p>
             </div>
 
@@ -345,12 +346,11 @@ function HelpSupport() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Still need help?
+              {t("Still need help?")}
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-gray-500">
-              Can't find the answer? Use the support form to describe
-              your issue.
+              {t("Can't find the answer? Use the support form to describe your issue.")}
             </p>
           </div>
 
@@ -363,11 +363,11 @@ function HelpSupport() {
 
               <div>
                 <h3 className="font-semibold text-gray-800">
-                  Support Center
+                  {t("Support Center")}
                 </h3>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  We're here to help you.
+                  {t("We're here to help you.")}
                 </p>
               </div>
             </div>
@@ -379,11 +379,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Email Support
+                    {t("Email Support")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Support contact coming soon
+                    {t("Support contact coming soon")}
                   </p>
                 </div>
               </div>
@@ -393,11 +393,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Phone Support
+                    {t("Phone Support")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Contact information coming soon
+                    {t("Contact information coming soon")}
                   </p>
                 </div>
               </div>
@@ -407,11 +407,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Help Resources
+                    {t("Help Resources")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Disha Help Center
+                    {t("Disha Help Center")}
                   </p>
                 </div>
               </div>
@@ -425,16 +425,16 @@ function HelpSupport() {
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7 xl:col-span-3">
 
           <h2 className="text-lg font-semibold text-gray-900">
-            Send us a message
+            {t("Send us a message")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Describe your issue and we'll help you.
+            {t("Describe your issue and we'll help you.")}
           </p>
 
           {submitted && (
             <div className="mt-5 rounded-xl border border-green-100 bg-green-50 p-4 text-sm text-green-700">
-              Your support request has been recorded in this demo.
+              {t("Your support request has been recorded in this demo.")}
             </div>
           )}
 
@@ -444,7 +444,7 @@ function HelpSupport() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Full Name *
+                  {t("Full Name *")}
                 </label>
 
                 <input
@@ -452,7 +452,7 @@ function HelpSupport() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter your name"
+                  placeholder={t("Enter your name")}
                   required
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
                 />
@@ -460,7 +460,7 @@ function HelpSupport() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Email Address *
+                  {t("Email Address *")}
                 </label>
 
                 <input
@@ -468,7 +468,7 @@ function HelpSupport() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Enter your email"
+                  placeholder={t("Enter your email")}
                   required
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
                 />
@@ -478,7 +478,7 @@ function HelpSupport() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Support Category
+                {t("Support Category")}
               </label>
 
               <select
@@ -487,25 +487,25 @@ function HelpSupport() {
                 onChange={handleChange}
                 className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               >
-                <option>General Inquiry</option>
-                <option>Account Problem</option>
-                <option>Resume Problem</option>
-                <option>Career Guidance</option>
-                <option>Technical Issue</option>
-                <option>Other</option>
+                <option value="General Inquiry">{t("General Inquiry")}</option>
+                <option value="Account Problem">{t("Account Problem")}</option>
+                <option value="Resume Problem">{t("Resume Problem")}</option>
+                <option value="Career Guidance">{t("Career Guidance")}</option>
+                <option value="Technical Issue">{t("Technical Issue")}</option>
+                <option value="Other">{t("Other")}</option>
               </select>
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Your Message *
+                {t("Your Message *")}
               </label>
 
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Describe your issue..."
+                placeholder={t("Describe your issue...")}
                 rows={5}
                 required
                 className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
@@ -517,7 +517,7 @@ function HelpSupport() {
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 sm:w-auto"
             >
               <Send size={17} />
-              Submit Request
+              {t("Submit Request")}
             </button>
 
           </form>

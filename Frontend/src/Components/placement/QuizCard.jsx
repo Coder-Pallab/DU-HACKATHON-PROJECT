@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Trophy,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const questions = [
   {
@@ -46,6 +47,7 @@ const questions = [
 ];
 
 function QuizCard() {
+  const { t } = useLanguage();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [userAnswers, setUserAnswers] = useState({});
@@ -95,11 +97,11 @@ function QuizCard() {
         </div>
 
         <h2 className="mt-4 text-xl font-bold text-gray-800">
-          Quiz Completed!
+          {t("Quiz Completed!")}
         </h2>
 
         <p className="mt-2 text-sm text-gray-500">
-          Here is your placement quiz result.
+          {t("Here is your placement quiz result.")}
         </p>
 
         <div className="my-6">
@@ -108,16 +110,16 @@ function QuizCard() {
           </p>
 
           <p className="mt-2 text-sm text-gray-500">
-            You scored {score} out of {questions.length}
+            {t("You scored")} {score} {t("out of")} {questions.length}
           </p>
         </div>
 
         <p className="mb-6 text-sm font-medium text-gray-700">
           {percentage >= 80
-            ? "Excellent work! Keep it up."
+            ? t("Excellent work! Keep it up.")
             : percentage >= 50
-            ? "Good effort! Keep practising."
-            : "Keep learning and try again!"}
+            ? t("Good effort! Keep practising.")
+            : t("Keep learning and try again!")}
         </p>
 
         <button
@@ -126,7 +128,7 @@ function QuizCard() {
           className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
         >
           <RotateCcw size={17} />
-          Try Again
+          {t("Try Again")}
         </button>
       </div>
     );
@@ -143,17 +145,17 @@ function QuizCard() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
-              Placement Quiz
+              {t("Placement Quiz")}
             </h2>
 
             <p className="text-sm text-gray-500">
-              Test your technical knowledge.
+              {t("Test your technical knowledge.")}
             </p>
           </div>
         </div>
 
         <span className="text-sm font-medium text-teal-700">
-          Question {currentQuestion + 1} of {questions.length}
+          {t("Question")} {currentQuestion + 1} {t("of")} {questions.length}
         </span>
       </div>
 
@@ -170,7 +172,7 @@ function QuizCard() {
       {/* Question */}
       <div className="mt-6">
         <h3 className="text-base font-semibold leading-relaxed text-gray-800 sm:text-lg">
-          {question.question}
+          {t(question.question, question.question)}
         </h3>
 
         {/* Options */}
@@ -199,7 +201,7 @@ function QuizCard() {
                   {String.fromCharCode(65 + index)}
                 </span>
 
-                <span>{option}</span>
+                <span>{t(option, option)}</span>
 
                 {isSelected && (
                   <CheckCircle2
@@ -222,8 +224,8 @@ function QuizCard() {
           className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {currentQuestion === questions.length - 1
-            ? "Finish Quiz"
-            : "Next Question"}
+            ? t("Finish Quiz")
+            : t("Next Question")}
 
           <ArrowRight size={17} />
         </button>
