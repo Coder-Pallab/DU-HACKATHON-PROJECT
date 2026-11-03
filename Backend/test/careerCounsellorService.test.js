@@ -4,6 +4,7 @@ import express from 'express';
 import app from '../src/app.js';
 import CareerCounsellingConversation from '../src/models/CareerCounsellingConversation.js';
 import { LANGUAGES } from '../src/constants/languages.js';
+import { readGeneratedText } from '../src/services/geminiService.js';
 import {
   buildCounsellorPrompt,
   buildCounsellorSystemInstruction,
@@ -46,9 +47,39 @@ test('counsellor prompt explicitly requests the selected response language', () 
     /natural Assamese/
   );
   assert.match(buildCounsellorSystemInstruction(LANGUAGES.ASSAMESE), /untrusted data/);
+  assert.match(buildCounsellorSystemInstruction(LANGUAGES.ENGLISH), /Answer the student's latest message directly/);
+  assert.match(buildCounsellorSystemInstruction(LANGUAGES.ENGLISH), /at most 180 words/);
+  assert.match(buildCounsellorSystemInstruction(LANGUAGES.ENGLISH), /school teaching from college teaching/);
+  assert.match(buildCounsellorSystemInstruction(LANGUAGES.ASSAMESE), /short replies such as a subject or career name as a follow-up/);
   assert.match(
     buildCounsellorPrompt(context),
-    /Student's latest message \(untrusted user-provided content\)/
+    /Student's latest message; answer this message using relevant earlier context/
+  );
+  assert.ok(
+    buildCounsellorPrompt({
+      ...context,
+      history: [{ role: 'user', content: 'x'.repeat(2000) }],
+    }).length < 2000,
+    'prompt bounds prior message size'
+  );
+});
+
+test('preserves the full generated text and rejects model output cut off by its token limit', () => {
+  const completeText = `First step.\n\n${'Detailed guidance. '.repeat(120)}`;
+  assert.equal(
+    readGeneratedText({
+      candidates: [{ finishReason: 'STOP' }],
+      text: () => completeText,
+    }),
+    completeText.trim()
+  );
+  assert.throws(
+    () =>
+      readGeneratedText({
+        candidates: [{ finishReason: 'MAX_TOKENS' }],
+        text: () => 'To become a professional teacher, start with step 1',
+      }),
+    /cut off before it completed/
   );
 });
 

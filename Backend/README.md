@@ -119,6 +119,7 @@ JWT_ACCESS_SECRET=your_jwt_access_secret_key_here
 JWT_REFRESH_SECRET=your_jwt_refresh_secret_key_here
 GEMINI_API_KEY=your_google_gemini_api_key_here
 GEMINI_CHAT_MODEL=gemini-3.8-flash
+GEMINI_COUNSELLOR_MODEL=gemini-3.6-flash
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
@@ -209,6 +210,6 @@ Resume text is extracted from the uploaded file before it is sent to Cloudinary 
 - `POST /api/v1/ai/chat/messages` accepts `{ "message": "How can I prepare for data analyst roles?", "language": "English" }`. `language` is optional and defaults to the student's preferred language (English or Assamese). Send a returned `conversationId` on later messages to continue a conversation; supply `language` to switch languages.
 - `GET /api/v1/ai/chat/conversations` lists the authenticated user's saved conversations (`page` and `limit` optional; limit is capped at 50).
 - `GET /api/v1/ai/chat/conversations/:conversationId` retrieves one conversation's complete persisted history and denies access to other users' conversations.
-- Conversations are stored in MongoDB. Replies use Gemini's Interactions API with `GEMINI_CHAT_MODEL` (defaults to `gemini-3.8-flash`). Provider data handling follows Google's Gemini API terms. If Gemini is unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message.
+- Conversations are stored in MongoDB. Replies use Gemini's `generateContent` API with `GEMINI_COUNSELLOR_MODEL` (defaults to the stable `gemini-3.6-flash`; falls back to `GEMINI_CHAT_MODEL` when explicitly configured), a 30-second provider timeout, and a 2,048-token response cap. The counsellor uses up to 10 recent messages (capped at 1,200 characters each) and is instructed to answer follow-up fragments in context with concise, practical guidance. Truncated model responses are rejected rather than saved as complete answers. Provider data handling follows Google's Gemini API terms. If Gemini is unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message. Failed sends remain in the chat input for retry.
 
 The backend only starts after a successful MongoDB connection. If MongoDB disconnects while running, database-backed routes return `503 Service Unavailable` instead of waiting for Mongoose's query-buffer timeout. Check that the MongoDB service is running and `MONGODB_URI` in `Backend/.env` points to a reachable database.

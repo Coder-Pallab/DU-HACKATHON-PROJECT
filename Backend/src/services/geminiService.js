@@ -1,18 +1,13 @@
-import { GoogleGenAI } from '@google/genai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ENV } from '../config/env.js';
 import { ApiError } from '../utils/apiError.js';
 import { baselineExtractSections } from './resumeParserService.js';
 
 let genAI = null;
-let interactionsAI = null;
+const GEMINI_REQUEST_TIMEOUT_MS = 30_000;
 
 if (ENV.GEMINI_API_KEY && ENV.GEMINI_API_KEY !== 'dummy_gemini_api_key_placeholder') {
   genAI = new GoogleGenerativeAI(ENV.GEMINI_API_KEY);
-  interactionsAI = new GoogleGenAI({
-    apiKey: ENV.GEMINI_API_KEY,
-    httpOptions: { timeout: 120000 },
-  });
   console.log('[Gemini AI] Google Gemini AI client initialized successfully');
 } else {
   console.log('[Gemini AI] GEMINI_API_KEY not configured or placeholder detected. Operating in intelligent fallback mode.');
@@ -46,6 +41,22 @@ const parseCleanJSON = (rawText) => {
   }
 };
 
+export const readGeneratedText = (response) => {
+  const finishReason = response.candidates?.[0]?.finishReason;
+  if (finishReason === 'MAX_TOKENS') {
+    throw ApiError.serviceUnavailable(
+      'The AI response was cut off before it completed. Please send your question again.'
+    );
+  }
+
+  const text = response.text()?.trim();
+  if (!text) {
+    throw new Error(`Gemini returned no complete text (finish reason: ${finishReason || 'unknown'}).`);
+  }
+
+  return text.slice(0, 8000);
+};
+
 /**
  * Call Gemini AI model to generate structured JSON content
  * @param {string} prompt 
@@ -67,7 +78,9 @@ export const generateStructuredJSON = async (prompt, systemInstruction = '') => 
       },
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt, {
+      timeout: GEMINI_REQUEST_TIMEOUT_MS,
+    });
     const response = await result.response;
     const text = response.text();
 
@@ -88,28 +101,26 @@ export const generateStructuredJSON = async (prompt, systemInstruction = '') => 
  * @returns {Promise<string>}
  */
 export const generateTextResponse = async (prompt, systemInstruction = '') => {
-  if (!interactionsAI) {
+  if (!genAI) {
     throw ApiError.serviceUnavailable(
       'Career counsellor AI is not configured. Please try again later.'
     );
   }
 
   try {
-    const response = await interactionsAI.interactions.create({
-      model: ENV.GEMINI_CHAT_MODEL,
-      input: prompt,
-      system_instruction:
+    const model = genAI.getGenerativeModel({
+      model: ENV.GEMINI_COUNSELLOR_MODEL,
+      systemInstruction:
         systemInstruction || 'You are a helpful AI assistant. Respond in plain text.',
-      generation_config: { max_output_tokens: 512, thinking_level: 'low' },
-      store: false,
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.4,
+      },
     });
-    const text = response.output_text?.trim();
-
-    if (!text) {
-      throw new Error(`Gemini returned no text (status: ${response.status})`);
-    }
-
-    return text.slice(0, 8000);
+    const result = await model.generateContent(prompt, {
+      timeout: GEMINI_REQUEST_TIMEOUT_MS,
+    });
+    return readGeneratedText(result.response);
   } catch (error) {
     console.error(`[Gemini AI] Career counsellor error: ${error.message}`);
     if (error instanceof ApiError) throw error;

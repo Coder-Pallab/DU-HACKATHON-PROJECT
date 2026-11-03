@@ -1,8 +1,6 @@
 import { Bot, User } from "lucide-react";
-import { useLanguage } from "../../hooks/useLanguage";
 
 function ChatMessage({ message }) {
-  const { t } = useLanguage();
   const isUser = message.role === "user";
 
   return (
@@ -29,18 +27,18 @@ function ChatMessage({ message }) {
         }`}
       >
         <div
-          className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
               ? "rounded-tr-sm bg-teal-700 text-white"
               : "rounded-tl-sm border border-gray-100 bg-white text-gray-700 shadow-sm"
           }`}
         >
-          {t(message.text, message.text)}
+          {message.text}
         </div>
 
         {message.time && (
           <span className="px-1 text-xs text-gray-400">
-            {t(message.time, message.time)}
+            {message.time}
           </span>
         )}
       </div>

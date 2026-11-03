@@ -90,10 +90,19 @@ function AICounsellor() {
       setConversationId(response.conversationId);
       setSelectedLanguage(response.language || selectedLanguage);
       setMessages((current) => [...current, ...mapMessages(response.messages)]);
-      const updatedList = await aiService.listConversations();
-      setConversations(updatedList);
+      setConversations((current) => [
+        {
+          _id: response.conversationId,
+          title: response.title,
+          language: response.language || selectedLanguage,
+          lastMessageAt: response.lastMessageAt,
+        },
+        ...current.filter((item) => item._id !== response.conversationId),
+      ]);
+      return true;
     } catch (requestError) {
       setError(getApiErrorMessage(requestError));
+      return false;
     } finally {
       setIsTyping(false);
     }

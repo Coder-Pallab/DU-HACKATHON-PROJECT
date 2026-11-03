@@ -186,7 +186,7 @@ const enrichSkillGaps = async (student, career, gaps, language) => {
   };
 };
 
-export const analyzeSkillGap = async (userId, careerId) => {
+export const analyzeSkillGap = async (userId, careerId, { enrich = true } = {}) => {
   const [student, career] = await Promise.all([getMyProfile(userId), getCareerById(careerId)]);
 
   if (!career.isActive) {
@@ -195,12 +195,9 @@ export const analyzeSkillGap = async (userId, careerId) => {
 
   const contentLanguage = getContentLanguage(student);
   const result = buildSkillGapResult(student, career, contentLanguage);
-  const aiEnrichment = await enrichSkillGaps(
-    student,
-    career,
-    result.missingSkills,
-    contentLanguage
-  );
+  const aiEnrichment = enrich
+    ? await enrichSkillGaps(student, career, result.missingSkills, contentLanguage)
+    : null;
 
   if (aiEnrichment) {
     result.missingSkills = result.missingSkills.map((gap) => ({

@@ -229,7 +229,7 @@ export const generateLearningRoadmap = async (userId, careerId) => {
   }).sort({ createdAt: -1 });
 
   if (!analysis) {
-    analysis = await analyzeSkillGap(userId, careerId);
+    analysis = await analyzeSkillGap(userId, careerId, { enrich: false });
   }
 
   const phases = buildRoadmapPhases(analysis, career, contentLanguage);

@@ -52,6 +52,9 @@ export function clearAuthTokens() {
 }
 
 export function getApiErrorMessage(error) {
+  if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
+    return "This request took too long to complete. Please try again.";
+  }
   const response = error?.response?.data;
   if (Array.isArray(response?.errors) && response.errors.length > 0) {
     const details = response.errors

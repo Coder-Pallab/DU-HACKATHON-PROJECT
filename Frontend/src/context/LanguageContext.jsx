@@ -19,6 +19,12 @@ export function LanguageProvider({ children }) {
   };
 
   useEffect(() => {
+    const activeLanguage = language === "as" ? "as" : "en";
+    document.documentElement.lang = activeLanguage;
+    document.documentElement.dataset.language = activeLanguage;
+  }, [language]);
+
+  useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "disha_language" && e.newValue) {
         setLanguageState(e.newValue);

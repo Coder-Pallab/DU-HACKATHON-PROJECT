@@ -20,7 +20,9 @@ export const aiService = {
   },
 
   async analyzeSkillGap(careerId) {
-    return getData(await apiClient.post("/ai/skill-gap/analyze", { careerId }));
+    return getData(
+      await apiClient.post("/ai/skill-gap/analyze", { careerId }, { timeout: 40_000 })
+    );
   },
 
   async getSkillGap(careerId) {
@@ -28,7 +30,9 @@ export const aiService = {
   },
 
   async generateRoadmap(careerId) {
-    return getData(await apiClient.post("/ai/roadmaps/generate", { careerId }));
+    return getData(
+      await apiClient.post("/ai/roadmaps/generate", { careerId }, { timeout: 40_000 })
+    );
   },
 
   async getRoadmap(careerId) {
@@ -60,6 +64,6 @@ export const aiService = {
   },
 
   async sendMessage(payload) {
-    return getData(await apiClient.post("/ai/chat/messages", payload));
+    return getData(await apiClient.post("/ai/chat/messages", payload, { timeout: 40_000 }));
   },
 };
