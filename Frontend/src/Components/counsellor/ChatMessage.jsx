@@ -27,7 +27,7 @@ function ChatMessage({ message }) {
         }`}
       >
         <div
-          className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`whitespace-pre-wrap wrap-break-word rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
               ? "rounded-tr-sm bg-teal-700 text-white"
               : "rounded-tl-sm border border-gray-100 bg-white text-gray-700 shadow-sm"
