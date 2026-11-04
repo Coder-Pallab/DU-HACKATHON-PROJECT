@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
     if (!getStoredTokens().accessToken && !getStoredTokens().refreshToken) {
       setUser(null);
       setSessionError("");
+      setIsLoading(false);
       return;
     }
 

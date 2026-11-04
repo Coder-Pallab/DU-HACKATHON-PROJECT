@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, LoaderCircle, RefreshCw } from "lucide-react";
+import { BookOpen, CheckCircle2, ExternalLink, LoaderCircle, RefreshCw } from "lucide-react";
 import PageHeader from "../../Components/layout/PageHeader";
 import { careerService } from "../../services/careerService";
 import { aiService } from "../../services/aiService";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { useLanguage } from "../../hooks/useLanguage";
+import { getLearningResource } from "../../utils/learningResources";
 
 function LearningRoadmap() {
   const { language, t } = useLanguage();
@@ -263,7 +264,9 @@ function LearningRoadmap() {
             </div>
           </div>
 
-          {(roadmap.phases || []).map((phase) => (
+          {(roadmap.phases || []).map((phase) => {
+            const learningResource = getLearningResource(phase.focusSkill);
+            return (
             <article key={phase._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -274,6 +277,20 @@ function LearningRoadmap() {
                   </div>
                   <h3 className="mt-3 text-lg font-semibold text-slate-800">{phase.title}</h3>
                   <p className="mt-1 text-sm text-slate-600">{phase.objective}</p>
+                  {learningResource && (
+                    <a
+                      href={learningResource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-teal-700 underline decoration-teal-300 underline-offset-4 hover:text-teal-900"
+                    >
+                      {learningResource.isSearch
+                        ? t("Find official learning resources for")
+                        : t("Learn this skill from the official documentation")}{" "}
+                      <span>{phase.focusSkill}</span>
+                      <ExternalLink size={15} aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
                 <select
                   aria-label={`Progress for ${phase.title}`}
@@ -300,7 +317,8 @@ function LearningRoadmap() {
               </div>
               {busyPhase === phase._id && <p className="mt-3 text-xs text-slate-500">{t("Saving progress...")}</p>}
             </article>
-          ))}
+            );
+          })}
         </section>
       )}
     </div>
