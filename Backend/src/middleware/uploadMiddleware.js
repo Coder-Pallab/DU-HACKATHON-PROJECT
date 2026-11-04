@@ -2,6 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { ApiError } from '../utils/apiError.js';
 import { ENV } from '../config/env.js';
@@ -10,7 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Ensure uploads directory exists
-const uploadsDir = path.resolve(__dirname, '../../uploads');
+const uploadsDir = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'career-guidance-uploads')
+  : path.resolve(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

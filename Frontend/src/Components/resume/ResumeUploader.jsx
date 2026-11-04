@@ -2,6 +2,15 @@ import { useRef, useState } from "react";
 import { Upload, X, FileCheck2 } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 
+const configuredMaxFileSize = Number(import.meta.env.VITE_RESUME_MAX_FILE_SIZE_BYTES);
+const MAX_FILE_SIZE_BYTES =
+  Number.isSafeInteger(configuredMaxFileSize) && configuredMaxFileSize > 0
+    ? configuredMaxFileSize
+    : import.meta.env.PROD
+      ? 4 * 1024 * 1024
+      : 10 * 1024 * 1024;
+const MAX_FILE_SIZE_MB = Math.floor(MAX_FILE_SIZE_BYTES / (1024 * 1024));
+
 function ResumeUploader({ file, onFileChange }) {
   const { t } = useLanguage();
   const inputRef = useRef(null);
@@ -20,8 +29,10 @@ function ResumeUploader({ file, onFileChange }) {
       return;
     }
 
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setError(t("File size must be less than 10 MB."));
+    if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+      setError(
+        t("File size must be less than 10 MB.").replace("10 MB", `${MAX_FILE_SIZE_MB} MB`)
+      );
       event.target.value = "";
       return;
     }
@@ -80,7 +91,7 @@ function ResumeUploader({ file, onFileChange }) {
           </span>
 
           <span className="mt-2 text-xs text-slate-500">
-            {t("PDF or DOCX · Maximum 10 MB")}
+            {t("PDF or DOCX · Maximum 10 MB").replace("10 MB", `${MAX_FILE_SIZE_MB} MB`)}
           </span>
         </button>
       ) : (

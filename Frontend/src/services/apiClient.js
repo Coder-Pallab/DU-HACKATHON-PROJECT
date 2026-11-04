@@ -1,7 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+if (import.meta.env.PROD && !configuredApiBaseUrl) {
+  throw new Error("VITE_API_BASE_URL must point to the deployed backend API.");
+}
+const API_BASE_URL = configuredApiBaseUrl || "http://localhost:5000/api/v1";
 const ACCESS_TOKEN_KEY = "disha_access_token";
 const REFRESH_TOKEN_KEY = "disha_refresh_token";
 

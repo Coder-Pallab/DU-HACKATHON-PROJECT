@@ -1,5 +1,11 @@
 import fs from 'fs';
 import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
+import { ENV } from '../config/env.js';
+import { ApiError } from '../utils/apiError.js';
+
+const removeTemporaryUpload = (file) => {
+  if (file?.path && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+};
 
 /**
  * Upload resume file to Cloudinary if configured, or retain in local storage
@@ -29,7 +35,20 @@ export const storeResumeFile = async (file) => {
       };
     } catch (cloudError) {
       console.warn(`[Cloudinary] Upload failed: ${cloudError.message}. Falling back to local storage.`);
+      if (ENV.NODE_ENV === 'production' || process.env.VERCEL) {
+        removeTemporaryUpload(file);
+        throw ApiError.serviceUnavailable(
+          'Resume cloud storage is unavailable. Check the Cloudinary configuration and try again.'
+        );
+      }
     }
+  }
+
+  if (ENV.NODE_ENV === 'production' || process.env.VERCEL) {
+    removeTemporaryUpload(file);
+    throw ApiError.serviceUnavailable(
+      'Resume cloud storage is not configured. Configure Cloudinary before uploading resumes.'
+    );
   }
 
   // Local storage fallback

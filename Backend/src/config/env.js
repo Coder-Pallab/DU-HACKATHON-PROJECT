@@ -11,6 +11,14 @@ const developmentRefreshSecret = 'dev_refresh_secret_ai_career_guidance_2026';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const nodeEnv = process.env.NODE_ENV || 'development';
+const configuredResumeFileSize = Number(process.env.MAX_FILE_SIZE_BYTES);
+const defaultResumeFileSize = process.env.VERCEL
+  ? 4 * 1024 * 1024
+  : 10 * 1024 * 1024;
+const configuredClientUrls = (process.env.CLIENT_URLS || '')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
 
 /**
  * Validated Environment Configuration
@@ -19,6 +27,9 @@ export const ENV = Object.freeze({
   NODE_ENV: nodeEnv,
   PORT: parseInt(process.env.PORT, 10) || 5000,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+  CLIENT_URLS: [
+    ...new Set([process.env.CLIENT_URL || 'http://localhost:3000', ...configuredClientUrls]),
+  ],
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/ai_career_guidance',
   
   // JWT
@@ -43,7 +54,10 @@ export const ENV = Object.freeze({
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
 
   // Upload limits
-  MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024, // 10MB
+  MAX_FILE_SIZE_BYTES:
+    Number.isSafeInteger(configuredResumeFileSize) && configuredResumeFileSize > 0
+      ? configuredResumeFileSize
+      : defaultResumeFileSize,
 });
 
 export const assertRuntimeConfig = (config = ENV) => {

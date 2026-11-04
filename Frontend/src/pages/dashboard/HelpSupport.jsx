@@ -36,7 +36,7 @@ const faqs = [
     category: "Resume",
     question: "Which resume file formats are supported?",
     answer:
-      "The resume API accepts PDF and DOCX files up to 10 MB. Uploaded files are stored by the backend and can be listed, downloaded, parsed, analyzed, or deleted from Resume & Skills.",
+      "The resume API accepts PDF and DOCX files up to 4 MB on Vercel deployments and up to 10 MB in local development. Uploaded files are stored in Cloudinary and can be listed, downloaded, parsed, analyzed, or deleted from Resume & Skills.",
   },
   {
     id: 4,
