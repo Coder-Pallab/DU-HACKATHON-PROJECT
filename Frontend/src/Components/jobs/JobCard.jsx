@@ -6,8 +6,11 @@ import {
   ArrowUpRight,
   IndianRupee,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function JobCard({ job, onView, onSave, isSaved = false }) {
+  const { t } = useLanguage();
+
   return (
     <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
 
@@ -31,7 +34,7 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
         <button
           type="button"
           onClick={() => onSave?.(job)}
-          aria-label={isSaved ? "Remove saved job" : "Save job"}
+          aria-label={isSaved ? t("Remove saved job") : t("Save job")}
           className={`shrink-0 rounded-lg p-2 transition ${
             isSaved
               ? "bg-teal-50 text-teal-700"
@@ -48,11 +51,11 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
       {/* Job Type */}
       <div className="mt-5 flex flex-wrap gap-2">
         <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">
-          {job.type}
+          {t(job.type, job.type)}
         </span>
 
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-          {job.mode}
+          {t(job.mode, job.mode)}
         </span>
       </div>
 
@@ -60,7 +63,7 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
       <div className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <MapPin size={16} />
-          <span>{job.location}</span>
+          <span>{t(job.location, job.location)}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -70,19 +73,19 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
 
         <div className="flex items-center gap-2">
           <Clock size={16} />
-          <span>{job.posted}</span>
+          <span>{t(job.posted, job.posted)}</span>
         </div>
       </div>
 
       {/* Description */}
       <p className="mt-5 line-clamp-2 text-sm leading-6 text-gray-600">
-        {job.description}
+        {t(job.description, job.description)}
       </p>
 
       {/* Skills */}
       <div className="mt-5">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Required Skills
+          {t("Required Skills")}
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -100,7 +103,7 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
       {/* Footer */}
       <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-100 pt-5 mt-6">
         <span className="text-xs text-gray-400">
-          {job.deadline ? `Deadline: ${job.deadline}` : "Explore opportunity"}
+          {job.deadline ? `${t("Deadline:")} ${job.deadline}` : t("Explore opportunity")}
         </span>
 
         <button
@@ -108,7 +111,7 @@ function JobCard({ job, onView, onSave, isSaved = false }) {
           onClick={() => onView?.(job)}
           className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-teal-800"
         >
-          View Details
+          {t("View Details")}
           <ArrowUpRight size={16} />
         </button>
       </div>

@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { Send, Paperclip } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ChatInput({ onSend, disabled = false }) {
+  const { t } = useLanguage();
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const trimmedMessage = message.trim();
 
-    if (!trimmedMessage || disabled) return;
+    if (!trimmedMessage || disabled || isSending) return;
 
-    onSend?.(trimmedMessage);
-    setMessage("");
+    setIsSending(true);
+    try {
+      const sent = await onSend?.(trimmedMessage);
+      if (sent !== false) setMessage("");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -23,7 +31,7 @@ function ChatInput({ onSend, disabled = false }) {
       {/* Attachment button - UI only */}
       <button
         type="button"
-        title="Attachment feature coming soon"
+        title={t("Attachment feature coming soon")}
         className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 sm:flex"
       >
         <Paperclip size={19} />
@@ -35,8 +43,8 @@ function ChatInput({ onSend, disabled = false }) {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Ask me anything about your career..."
-          disabled={disabled}
+          placeholder={t("Ask me anything about your career...")}
+          disabled={disabled || isSending}
           className="h-11 min-w-0 flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed"
         />
       </div>
@@ -44,9 +52,9 @@ function ChatInput({ onSend, disabled = false }) {
       {/* Send button */}
       <button
         type="submit"
-        disabled={!message.trim() || disabled}
+        disabled={!message.trim() || disabled || isSending}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label="Send message"
+        aria-label={t("Send message")}
       >
         <Send size={18} />
       </button>

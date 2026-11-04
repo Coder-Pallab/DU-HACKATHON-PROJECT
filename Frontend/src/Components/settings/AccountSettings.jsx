@@ -1,180 +1,92 @@
 import { useState } from "react";
-import { UserRound, Save } from "lucide-react";
+import { KeyRound, UserRound } from "lucide-react";
+import { authService } from "../../services/authService";
+import { getApiErrorMessage } from "../../services/apiClient";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-function AccountSettings({ initialValues, onSave }) {
-  const [formData, setFormData] = useState({
-    fullName: "Aditya Sharma",
-    email: "student@example.com",
-    phone: "",
-    college: "",
-    course: "BCA",
-    ...initialValues,
-  });
+function AccountSettings({ profile }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-
-    setMessage("");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setNotice("");
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      setError("New password must contain at least 8 characters, including a letter and a number.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match.");
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const response = await authService.changePassword(currentPassword, newPassword);
+      const message = response.message || "Password changed. Please sign in again.";
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      await logout(false);
+      navigate("/login", { replace: true, state: { message } });
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSaving(false);
+    }
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    onSave?.(formData);
-    setMessage("Account information updated successfully!");
-  };
-
-  const inputClass =
-    "w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100";
 
   return (
-    <div className="w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-
-      {/* Header */}
+    <section className="w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
-          <UserRound size={22} />
-        </div>
-
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><UserRound size={22} /></div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            Account Settings
-          </h2>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Manage your personal account information.
-          </p>
+          <h2 className="text-lg font-semibold text-gray-900">Account settings</h2>
+          <p className="mt-1 text-sm text-gray-500">Account details are managed in your student profile.</p>
         </div>
       </div>
+      <dl className="grid gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
+        <div><dt className="text-xs text-slate-500">Name</dt><dd className="mt-1 text-sm font-medium text-slate-800">{profile.fullName || profile.user?.name}</dd></div>
+        <div><dt className="text-xs text-slate-500">Email</dt><dd className="mt-1 text-sm font-medium text-slate-800">{profile.user?.email}</dd></div>
+        <div><dt className="text-xs text-slate-500">Phone</dt><dd className="mt-1 text-sm font-medium text-slate-800">{profile.phoneNumber || "Not provided"}</dd></div>
+        <div><dt className="text-xs text-slate-500">Role</dt><dd className="mt-1 text-sm font-medium text-slate-800">Student</dd></div>
+      </dl>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-5">
-
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-          {/* Full Name */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              className={inputClass}
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className={inputClass}
-              required
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Phone Number
-            </label>
-
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-              className={inputClass}
-            />
-          </div>
-
-          {/* College */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              College / Institution
-            </label>
-
-            <input
-              type="text"
-              name="college"
-              value={formData.college}
-              onChange={handleChange}
-              placeholder="Enter your college name"
-              className={inputClass}
-            />
-          </div>
-
-          {/* Course */}
-          <div className="sm:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Current Course
-            </label>
-
-            <select
-              name="course"
-              value={formData.course}
-              onChange={handleChange}
-              className={inputClass}
-            >
-              <option value="">Select your course</option>
-              <option value="BCA">BCA</option>
-              <option value="BSc Computer Science">
-                BSc Computer Science
-              </option>
-              <option value="BTech">BTech</option>
-              <option value="BA">BA</option>
-              <option value="BCom">BCom</option>
-              <option value="MCA">MCA</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
+      <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+        <div className="flex items-center gap-2">
+          <KeyRound size={19} className="text-teal-700" />
+          <h3 className="font-semibold text-slate-800">Change password</h3>
         </div>
-
-        {/* Success Message */}
-        {message && (
-          <p
-            role="status"
-            className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700"
-          >
-            {message}
-          </p>
-        )}
-
-        {/* Save Button */}
-        <div className="flex justify-end border-t border-gray-100 pt-5">
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
-          >
-            <Save size={17} />
-            Save Changes
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="text-sm font-medium text-slate-700">
+            Current password
+            <input type="password" autoComplete="current-password" required value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5" />
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            New password
+            <input type="password" autoComplete="new-password" required value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5" />
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            Confirm new password
+            <input type="password" autoComplete="new-password" required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5" />
+          </label>
+        </div>
+        {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {notice && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-700">{notice}</p>}
+        <div className="flex justify-end border-t border-gray-100 pt-4">
+          <button type="submit" disabled={isSaving} className="rounded-lg bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50">
+            {isSaving ? "Changing password..." : "Change password"}
           </button>
         </div>
-
       </form>
-    </div>
+    </section>
   );
 }
 

@@ -1,226 +1,233 @@
-import { useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, BriefcaseBusiness, RefreshCw, TrendingUp } from "lucide-react";
 import PageHeader from "../../Components/layout/PageHeader";
-
-import CareerCard from "../../Components/careers/CareerCard";
-import CareerFilters from "../../Components/careers/CareerFilters";
-import CareerComparison from "../../Components/careers/CareerComparison";
 import SkillGapAnalysis from "../../Components/careers/SkillGapAnalysis";
-import CareerDetails from "../../Components/careers/CareerDetails";
+import { aiService } from "../../services/aiService";
+import { careerService } from "../../services/careerService";
+import { getApiErrorMessage } from "../../services/apiClient";
+import { useLanguage } from "../../hooks/useLanguage";
 
-const careers = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    category: "Technology",
-    description:
-      "Build responsive and interactive websites using modern frontend technologies.",
-    matchPercentage: 92,
-    salary: "₹3–8 LPA",
-    experience: "0–2 Years",
-    growth: "High",
-    qualification: "BCA, B.Tech, MCA or equivalent skills",
-    skills: ["HTML", "CSS", "JavaScript", "React", "Git"],
-    responsibilities: [
-      "Develop responsive websites.",
-      "Convert UI designs into functional interfaces.",
-      "Write clean and maintainable code.",
-      "Fix bugs and improve performance.",
-    ],
-    learningPath: [
-      "Learn HTML, CSS and JavaScript.",
-      "Understand React.js.",
-      "Learn Git and GitHub.",
-      "Build practical projects.",
-      "Prepare for technical interviews.",
-    ],
-  },
-  {
-    id: 2,
-    title: "Data Analyst",
-    category: "Data Science",
-    description:
-      "Analyze data, identify patterns and help organizations make better decisions.",
-    matchPercentage: 85,
-    salary: "₹4–9 LPA",
-    experience: "0–2 Years",
-    growth: "High",
-    qualification: "BCA, B.Tech or equivalent",
-    skills: ["Python", "SQL", "Excel", "Power BI"],
-    responsibilities: [
-      "Analyze structured datasets.",
-      "Prepare reports and dashboards.",
-      "Identify trends and patterns.",
-      "Present data-driven insights.",
-    ],
-    learningPath: [
-      "Learn Excel.",
-      "Learn SQL.",
-      "Learn Python.",
-      "Practice data visualization.",
-      "Build data analysis projects.",
-    ],
-  },
-  {
-    id: 3,
-    title: "UI/UX Designer",
-    category: "Design",
-    description:
-      "Design user-friendly digital experiences through research, wireframes and prototypes.",
-    matchPercentage: 78,
-    salary: "₹3–7 LPA",
-    experience: "0–2 Years",
-    growth: "High",
-    qualification: "Any relevant degree with design skills",
-    skills: ["Figma", "Wireframing", "Prototyping", "Design Thinking"],
-    responsibilities: [
-      "Create wireframes and prototypes.",
-      "Design user interfaces.",
-      "Conduct user research.",
-      "Improve user experience.",
-    ],
-    learningPath: [
-      "Learn design fundamentals.",
-      "Learn Figma.",
-      "Practice wireframing.",
-      "Create interactive prototypes.",
-      "Build a design portfolio.",
-    ],
-  },
-];
+const careerIdFor = (recommendation) =>
+  typeof recommendation.career === "object"
+    ? recommendation.career?._id
+    : recommendation.career;
+const careerSectorFor = (recommendation) =>
+  recommendation.sector || recommendation.career?.sector;
+const EMPTY_RECOMMENDATIONS = [];
+
+const formatSalary = (range) => {
+  if (!range?.min && !range?.max) return "Not provided";
+  const currency = range.currency === "INR" ? "₹" : `${range.currency || ""} `;
+  const min = Math.round((range.min || 0) / 100000);
+  const max = Math.round((range.max || 0) / 100000);
+  return `${currency}${min}–${max} LPA`;
+};
 
 function CareerMatches() {
-  const [selectedCareer, setSelectedCareer] = useState(null);
+  const { language, t } = useLanguage();
+  const contentLanguage = language === "as" ? "Assamese" : "English";
+  const [recommendationData, setRecommendationData] = useState(null);
+  const [loadedLanguage, setLoadedLanguage] = useState("");
+  const [selectedSector, setSelectedSector] = useState("All sectors");
+  const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+  const [careerDetails, setCareerDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const [filters, setFilters] = useState({
-    category: "All",
-    salary: "All",
-    experience: "All",
-  });
+  useEffect(() => {
+    let active = true;
+    aiService.getRecommendations()
+      .then((result) => {
+        if (active) {
+          setRecommendationData(result);
+          setLoadedLanguage(contentLanguage);
+          setSelectedRecommendation(null);
+          setCareerDetails(null);
+          setError("");
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setRecommendationData(null);
+          setLoadedLanguage(contentLanguage);
+          setError(getApiErrorMessage(requestError));
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [contentLanguage]);
 
-  const filteredCareers = useMemo(() => {
-    return careers.filter((career) => {
-      const categoryMatch =
-        filters.category === "All" ||
-        career.category === filters.category;
+  const isRecommendationsLoading = isLoading || loadedLanguage !== contentLanguage;
+  const recommendations = recommendationData?.recommendations || EMPTY_RECOMMENDATIONS;
+  const localizedText = (item, key, fallback) => item[key] || fallback;
+  const sectors = useMemo(
+    () => [...new Set(recommendations.map(careerSectorFor).filter(Boolean))],
+    [recommendations]
+  );
+  const filteredRecommendations = recommendations.filter(
+    (item) => selectedSector === "All sectors" || careerSectorFor(item) === selectedSector
+  );
 
-      const experienceMatch =
-        filters.experience === "All" ||
-        career.experience === filters.experience;
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setError("");
+    try {
+      setRecommendationData(await aiService.refreshRecommendations());
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-      return categoryMatch && experienceMatch;
-    });
-  }, [filters]);
+  const handleViewDetails = async (recommendation) => {
+    setSelectedRecommendation(recommendation);
+    setCareerDetails(null);
+    setError("");
+    try {
+      setCareerDetails(await careerService.get(careerIdFor(recommendation)));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    }
+  };
 
   return (
     <div className="w-full min-w-0 space-y-8">
-
-      {/* Page Header */}
       <PageHeader
-        title="Career Matches"
-        description="Explore career opportunities based on your interests, skills and qualifications."
+        title={t("Career Matches")}
+        description={t("Recommendations are calculated from your student profile, skills, interests, and academic details.")}
       />
 
-      {/* Career Filters */}
-      <section className="min-w-0">
-        <CareerFilters onFilterChange={setFilters} />
-      </section>
+      {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
 
-      {/* Career Recommendations */}
-      <section className="space-y-5">
-
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">
-            Recommended Careers
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Explore career paths that match your profile.
-          </p>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">{t("Recommended careers")}</h2>
+            {recommendationData && loadedLanguage === contentLanguage && (
+              <p className="mt-1 text-sm text-slate-500">
+                {recommendationData.totalEvaluated} {t("careers evaluated")}
+                {recommendationData.lastAnalyzedAt && ` · ${t("Updated")} ${new Date(recommendationData.lastAnalyzedAt).toLocaleString()}`}
+                {recommendationData.isAIEnriched ? ` · ${t("AI-enriched")}` : ""}
+              </p>
+            )}
+          </div>
+          <button type="button" disabled={isRefreshing || isRecommendationsLoading} onClick={handleRefresh} className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50">
+            <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
+            {isRefreshing ? t("Refreshing...") : t("Refresh recommendations")}
+          </button>
         </div>
 
-        {filteredCareers.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="mt-5">
+          <label htmlFor="sector-filter" className="mr-3 text-sm font-medium text-slate-700">{t("Filter by sector")}</label>
+          <select id="sector-filter" value={selectedSector} onChange={(event) => setSelectedSector(event.target.value)} className="mt-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm sm:mt-0">
+            <option value="All sectors">{t("All sectors")}</option>
+            {sectors.map((sector) => {
+              const sectorRecommendation = recommendations.find((item) => careerSectorFor(item) === sector);
+              return (
+                <option key={sector} value={sector}>
+                  {sectorRecommendation
+                    ? localizedText(sectorRecommendation, "localizedSector", sector)
+                    : sector}
+                </option>
+              );
+            })}
+          </select>
+        </div>
 
-            {filteredCareers.map((career) => (
-              <CareerCard
-                key={career.id}
-                title={career.title}
-                description={career.description}
-                matchPercentage={career.matchPercentage}
-                salary={career.salary}
-                experience={career.experience}
-                skills={career.skills}
-                onViewDetails={() => setSelectedCareer(career)}
-              />
-            ))}
-
-          </div>
+        {isRecommendationsLoading ? (
+          <p className="mt-6 text-sm text-slate-500">{t("Loading your recommendations...")}</p>
+        ) : filteredRecommendations.length === 0 ? (
+          <p className="mt-6 rounded-xl bg-slate-50 p-5 text-sm text-slate-600">{t("No recommendations are available for this filter.")}</p>
         ) : (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-            <p className="font-medium text-slate-700">
-              No careers found.
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              Try changing your filters.
-            </p>
+          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+            {filteredRecommendations.map((item) => (
+              <article key={item._id || careerIdFor(item)} className="rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="rounded-xl bg-teal-50 p-3 text-teal-700"><BriefcaseBusiness size={21} /></div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">{localizedText(item, "localizedCareerTitle", item.careerTitle)}</h3>
+                      <p className="text-xs text-slate-500">{localizedText(item, "localizedSector", careerSectorFor(item) || t("Career"))}</p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-800">{item.matchPercentage}% {t("match")}</span>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-slate-600">{localizedText(item, "localizedCareerFitSummary", item.careerFitSummary || item.careerDescription)}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {(item.matchingSkills || []).slice(0, 5).map((skill) => <span key={skill} className="rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800">✓ {skill}</span>)}
+                  {(item.missingSkills || []).slice(0, 5).map((skill) => <span key={skill} className="rounded-full bg-amber-50 px-2.5 py-1 text-xs text-amber-800">{t("Learn:")} {skill}</span>)}
+                </div>
+                {(item.localizedSuggestedNextSteps || item.suggestedNextSteps)?.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-semibold text-slate-700">{t("Suggested next steps")}</h4>
+                    <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-slate-600">
+                      {(item.localizedSuggestedNextSteps || item.suggestedNextSteps).slice(0, 3).map((step, index) => <li key={`${item.careerTitle}-step-${index}`}>{step}</li>)}
+                    </ul>
+                  </div>
+                )}
+                <button type="button" onClick={() => handleViewDetails(item)} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:text-teal-900">
+                  {t("Career details")} <ArrowRight size={16} />
+                </button>
+              </article>
+            ))}
           </div>
         )}
-
       </section>
 
-      {/* Selected Career Details */}
-      {selectedCareer && (
-        <section className="space-y-4">
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-bold text-slate-800">
-              Career Details
-            </h2>
-
-            <button
-              onClick={() => setSelectedCareer(null)}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              Close Details
-            </button>
+      {selectedRecommendation && loadedLanguage === contentLanguage && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="text-xl font-bold text-slate-800">{localizedText(selectedRecommendation, "localizedCareerTitle", selectedRecommendation.careerTitle)}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {localizedText(selectedRecommendation, "localizedCareerDescription", careerDetails?.description || selectedRecommendation.careerDescription)}
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl bg-slate-50 p-4">
+              <div className="flex items-center gap-2 text-sm text-slate-500"><TrendingUp size={16} /> {t("Expected salary")}</div>
+              <p className="mt-2 font-semibold text-slate-800">{formatSalary(careerDetails?.averageSalaryRange || careerDetails?.career?.averageSalaryRange)}</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="text-sm text-slate-500">{t("Demand")} · {t("Experience")}</p>
+              <p className="mt-2 font-semibold text-slate-800">
+                {careerDetails?.industryDemand || t("Not provided")} · {careerDetails?.experienceLevel || t("Not provided")}
+              </p>
+            </div>
           </div>
-
-          <CareerDetails career={selectedCareer} />
-
+          {careerDetails?.requiredTechnicalSkills?.length > 0 && (
+            <div className="mt-5">
+              <h3 className="font-semibold text-slate-800">{t("Required technical skills")}</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {careerDetails.requiredTechnicalSkills.map((skill) => <span key={skill.name} className="rounded-full bg-teal-50 px-3 py-1 text-sm text-teal-800">{skill.name} · {skill.importance}</span>)}
+              </div>
+            </div>
+          )}
+          {(selectedRecommendation.localizedRequiredQualifications || selectedRecommendation.requiredQualifications)?.length > 0 && (
+            <div className="mt-5">
+              <h3 className="font-semibold text-slate-800">{t("Qualifications")}</h3>
+              <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
+                {(selectedRecommendation.localizedRequiredQualifications || selectedRecommendation.requiredQualifications).map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+          )}
+          {selectedRecommendation.scoreBreakdown && (
+            <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+              {Object.entries(selectedRecommendation.scoreBreakdown).map(([label, score]) => (
+                <div key={label} className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-xs capitalize text-slate-500">{label.replace(/([A-Z])/g, " $1")}</p>
+                  <p className="mt-1 text-lg font-bold text-slate-800">{score}%</p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
-      {/* Career Comparison */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">
-            Compare Careers
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Compare different career paths to make a better decision.
-          </p>
-        </div>
-
-        <CareerComparison />
-      </section>
-
-      {/* Skill Gap Analysis */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">
-            Skill Gap Analysis
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Understand which skills you need to develop for your target career.
-          </p>
-        </div>
-
-        <SkillGapAnalysis />
-      </section>
-
+      {!isLoading && recommendations.length > 0 && <SkillGapAnalysis recommendations={recommendations} />}
     </div>
   );
 }

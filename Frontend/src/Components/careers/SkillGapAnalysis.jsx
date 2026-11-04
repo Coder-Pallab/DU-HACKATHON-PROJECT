@@ -1,247 +1,129 @@
 import { useState } from "react";
-import {
-  Target,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  BookOpen,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, LoaderCircle, Target } from "lucide-react";
+import { aiService } from "../../services/aiService";
+import { getApiErrorMessage } from "../../services/apiClient";
+import { useLanguage } from "../../hooks/useLanguage";
 
-function SkillGapAnalysis() {
-  const careerSkills = [
-    {
-      id: 1,
-      name: "HTML",
-      level: "Beginner",
-      required: "Intermediate",
-      completed: true,
-    },
-    {
-      id: 2,
-      name: "CSS",
-      level: "Intermediate",
-      required: "Advanced",
-      completed: true,
-    },
-    {
-      id: 3,
-      name: "JavaScript",
-      level: "Intermediate",
-      required: "Advanced",
-      completed: true,
-    },
-    {
-      id: 4,
-      name: "React.js",
-      level: "Intermediate",
-      required: "Advanced",
-      completed: true,
-    },
-    {
-      id: 5,
-      name: "TypeScript",
-      level: "Not Learned",
-      required: "Intermediate",
-      completed: false,
-    },
-    {
-      id: 6,
-      name: "Git & GitHub",
-      level: "Beginner",
-      required: "Intermediate",
-      completed: false,
-    },
-  ];
+const careerIdFor = (recommendation) =>
+  typeof recommendation.career === "object"
+    ? recommendation.career?._id
+    : recommendation.career;
 
-  const [selectedCareer, setSelectedCareer] = useState("Frontend Developer");
+function SkillGapAnalysis({ recommendations = [] }) {
+  const { language, t } = useLanguage();
+  const [careerId, setCareerId] = useState(() => recommendations[0] ? careerIdFor(recommendations[0]) : "");
+  const [analysis, setAnalysis] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const currentContentLanguage = language === "as" ? "Assamese" : "English";
+  const languageMismatch =
+    analysis && analysis.contentLanguage !== currentContentLanguage;
 
-  const completedSkills = careerSkills.filter(
-    (skill) => skill.completed
-  );
-
-  const missingSkills = careerSkills.filter(
-    (skill) => !skill.completed
-  );
-
-  const progress = Math.round(
-    (completedSkills.length / careerSkills.length) * 100
-  );
+  const loadAnalysis = async (generate) => {
+    if (!careerId) return;
+    setIsLoading(true);
+    setError("");
+    try {
+      setAnalysis(generate ? await aiService.analyzeSkillGap(careerId) : await aiService.getSkillGap(careerId));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+      setAnalysis(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="w-full min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
-      {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-teal-50 p-3 text-teal-700">
-            <Target size={22} />
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800">
-              Skill Gap Analysis
-            </h2>
-
-            <p className="text-sm text-slate-500">
-              Identify the skills you need for your career.
-            </p>
-          </div>
+      <div className="mb-5 flex items-center gap-3">
+        <div className="rounded-xl bg-teal-50 p-3 text-teal-700"><Target size={22} /></div>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-800">{t("Skill Gap Analysis")}</h2>
+          <p className="text-sm text-slate-500">{t("Generate a report using your saved profile skills and a real career.")}</p>
         </div>
-
-        <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
-          Sample Analysis
-        </span>
       </div>
 
-      {/* Career Selection */}
-      <div className="mb-6">
-        <label
-          htmlFor="selectedCareer"
-          className="mb-2 block text-sm font-medium text-slate-700"
-        >
-          Select Your Target Career
-        </label>
-
+      <div className="flex flex-col gap-3 sm:flex-row">
         <select
-          id="selectedCareer"
-          value={selectedCareer}
-          onChange={(event) => setSelectedCareer(event.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-teal-600 focus:ring-2 focus:ring-teal-100 sm:max-w-md"
+          value={careerId}
+          onChange={(event) => {
+            setCareerId(event.target.value);
+            setAnalysis(null);
+          }}
+          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700"
+          aria-label="Career for skill gap analysis"
         >
-          <option>Frontend Developer</option>
-          <option>Backend Developer</option>
-          <option>Data Analyst</option>
-          <option>UI/UX Designer</option>
+          {recommendations.map((item) => {
+            const id = careerIdFor(item);
+            return <option key={id} value={id}>{item.careerTitle}</option>;
+          })}
         </select>
+        <button type="button" disabled={!careerId || isLoading} onClick={() => loadAnalysis(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50">
+          {t("Load latest")}
+        </button>
+        <button type="button" disabled={!careerId || isLoading} onClick={() => loadAnalysis(true)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50">
+          {isLoading && <LoaderCircle size={16} className="animate-spin" />}
+          {t("Analyze skill gap")}
+        </button>
       </div>
 
-      {/* Progress Overview */}
-      <div className="mb-6 rounded-xl bg-teal-50 p-5">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-teal-800">
-              Your skill readiness
-            </p>
-
-            <h3 className="mt-1 text-2xl font-bold text-teal-900">
-              {progress}%
-            </h3>
-          </div>
-
-          <div className="rounded-full bg-white p-3 text-teal-700">
-            <TrendingUp size={24} />
-          </div>
-        </div>
-
-        <div
-          className="h-3 w-full overflow-hidden rounded-full bg-white"
-          role="progressbar"
-          aria-label="Skill readiness"
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <div
-            className="h-full rounded-full bg-teal-600 transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <p className="mt-3 text-xs text-teal-800">
-          You currently have {completedSkills.length} out of{" "}
-          {careerSkills.length} listed skills marked as completed.
-        </p>
-      </div>
-
-      {/* Skills Overview */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-        {/* Existing Skills */}
-        <div>
-          <div className="mb-4 flex items-center gap-2">
-            <CheckCircle2 size={19} className="text-green-600" />
-
-            <h3 className="font-semibold text-slate-800">
-              Your Existing Skills
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            {completedSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="rounded-xl border border-green-100 bg-green-50 p-4"
+      {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {analysis && (
+        <div className="mt-6">
+          {languageMismatch && (
+            <div role="status" className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-amber-900">
+                {analysis.contentLanguage
+                  ? t("This report was generated in {language}. Regenerate it to create content in your current language.")
+                      .replace("{language}", t(analysis.contentLanguage))
+                  : t("This saved report predates language tracking. Regenerate it to create content in your current language.")}
+              </p>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => loadAnalysis(true)}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-amber-800 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium text-slate-800">
-                    {skill.name}
-                  </span>
-
-                  <span className="text-xs font-semibold text-green-700">
-                    {skill.level}
-                  </span>
+                {isLoading && <LoaderCircle size={15} className="animate-spin" />}
+                {t("Regenerate in {language}").replace("{language}", t(currentContentLanguage))}
+              </button>
+            </div>
+          )}
+          <div className="rounded-xl bg-teal-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-teal-900">{analysis.careerTitle} {t("readiness")}</p>
+              <strong className="text-xl text-teal-900">{analysis.matchPercentage}%</strong>
+            </div>
+            <p className="mt-2 text-sm text-teal-800">{analysis.summary}</p>
+          </div>
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            <div>
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-800"><CheckCircle2 size={18} className="text-green-600" />{t("Matching skills")}</h3>
+              {analysis.matchingSkills?.length ? (
+                <ul className="flex flex-wrap gap-2">{analysis.matchingSkills.map((skill) => <li key={skill} className="rounded-full bg-green-50 px-3 py-1 text-sm text-green-800">{skill}</li>)}</ul>
+              ) : <p className="text-sm text-slate-500">{t("No matching skills are recorded yet.")}</p>}
+            </div>
+            <div>
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-800"><AlertCircle size={18} className="text-amber-600" />{t("Skills to develop")}</h3>
+              {analysis.missingSkills?.length ? (
+                <div className="space-y-3">
+                  {analysis.missingSkills.map((skill) => (
+                    <article key={`${skill.name}-${skill.category}`} className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <strong className="text-slate-800">{skill.name}</strong>
+                        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-amber-800">{t(`${skill.priority} priority`)} · {t(skill.category)}</span>
+                      </div>
+                      <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-slate-600">
+                        {(skill.learningSteps || []).map((step, index) => <li key={`${skill.name}-step-${index}`}>{step}</li>)}
+                      </ul>
+                    </article>
+                  ))}
                 </div>
-
-                <p className="mt-2 text-xs text-slate-500">
-                  Required level: {skill.required}
-                </p>
-              </div>
-            ))}
+              ) : <p className="text-sm text-slate-500">{t("No skill gaps were reported for this career.")}</p>}
+            </div>
           </div>
         </div>
-
-        {/* Missing Skills */}
-        <div>
-          <div className="mb-4 flex items-center gap-2">
-            <AlertCircle size={19} className="text-amber-600" />
-
-            <h3 className="font-semibold text-slate-800">
-              Skills to Develop
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            {missingSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="rounded-xl border border-amber-100 bg-amber-50 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium text-slate-800">
-                    {skill.name}
-                  </span>
-
-                  <span className="text-xs font-semibold text-amber-700">
-                    {skill.level}
-                  </span>
-                </div>
-
-                <p className="mt-2 text-xs text-slate-500">
-                  Target level: {skill.required}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-
-      {/* Learning Recommendation */}
-      <div className="mt-6 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <BookOpen size={21} className="mt-0.5 shrink-0 text-teal-700" />
-
-        <div>
-          <h4 className="font-semibold text-slate-800">
-            Learning Recommendation
-          </h4>
-
-          <p className="mt-1 text-sm leading-relaxed text-slate-600">
-            Focus on learning TypeScript and improving your Git and GitHub
-            knowledge to strengthen your {selectedCareer} profile.
-          </p>
-        </div>
-      </div>
-
+      )}
     </section>
   );
 }

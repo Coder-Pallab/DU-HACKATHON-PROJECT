@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { FileText, Eye, Download, X } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ResumePreview({ file, fileUrl }) {
+  const { t } = useLanguage();
   const [showPreview, setShowPreview] = useState(false);
 
   if (!file) {
@@ -10,11 +12,11 @@ function ResumePreview({ file, fileUrl }) {
         <FileText size={35} className="mb-3 text-slate-400" />
 
         <h3 className="font-semibold text-slate-700">
-          No Resume Selected
+          {t("No Resume Selected")}
         </h3>
 
         <p className="mt-1 text-sm text-slate-500">
-          Upload a resume to preview it here.
+          {t("Upload a resume to preview it here.")}
         </p>
       </section>
     );
@@ -32,11 +34,11 @@ function ResumePreview({ file, fileUrl }) {
 
           <div>
             <h2 className="text-lg font-semibold text-slate-800">
-              Resume Preview
+              {t("Resume Preview")}
             </h2>
 
             <p className="text-sm text-slate-500">
-              View or download your selected resume.
+              {t("View or download your selected resume.")}
             </p>
           </div>
         </div>
@@ -54,32 +56,29 @@ function ResumePreview({ file, fileUrl }) {
                 className="flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
               >
                 <Eye size={16} />
-                Preview
+                {t("Preview")}
               </button>
             )}
 
-            <a
-              href={fileUrl}
-              download={file.name}
-              className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            >
-              <Download size={16} />
-              Download
-            </a>
+            {fileUrl && (
+              <a
+                href={fileUrl}
+                download={file.name}
+                className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <Download size={16} />
+                {t("Download")}
+              </a>
+            )}
           </div>
-
-          {!isPDF && (
-            <p className="mt-3 text-xs text-slate-500">
-              Preview is available only for PDF files.
-            </p>
-          )}
         </div>
       </section>
 
-      {showPreview && isPDF && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 sm:p-6">
-          <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white">
-            <div className="flex items-center justify-between border-b p-4">
+      {/* PDF Modal Preview */}
+      {showPreview && isPDF && fileUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative flex h-[85vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <h3 className="truncate font-semibold text-slate-800">
                 {file.name}
               </h3>
@@ -87,18 +86,20 @@ function ResumePreview({ file, fileUrl }) {
               <button
                 type="button"
                 onClick={() => setShowPreview(false)}
-                aria-label="Close preview"
-                className="rounded-lg p-2 hover:bg-slate-100"
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                aria-label={t("Close")}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <iframe
-              src={fileUrl}
-              title="Resume PDF Preview"
-              className="min-h-0 flex-1"
-            />
+            <div className="flex-1 p-2">
+              <iframe
+                src={fileUrl}
+                title={file.name}
+                className="h-full w-full rounded-xl border border-slate-200"
+              />
+            </div>
           </div>
         </div>
       )}

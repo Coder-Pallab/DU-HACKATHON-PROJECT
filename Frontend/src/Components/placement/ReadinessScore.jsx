@@ -1,4 +1,5 @@
 import { Target, TrendingUp, Award } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ReadinessScore({
   score = 72,
@@ -6,6 +7,8 @@ function ReadinessScore({
   aptitude = 65,
   communication = 70,
 }) {
+  const { t } = useLanguage();
+
   const categories = [
     { name: "Technical Skills", value: technical },
     { name: "Aptitude", value: aptitude },
@@ -26,10 +29,10 @@ function ReadinessScore({
 
         <div>
           <h2 className="text-lg font-semibold text-gray-800">
-            Placement Readiness
+            {t("Placement Readiness")}
           </h2>
           <p className="text-sm text-gray-500">
-            Your overall preparation score
+            {t("Your overall preparation score")}
           </p>
         </div>
       </div>
@@ -70,7 +73,7 @@ function ReadinessScore({
             <p className="text-3xl font-bold text-gray-800">
               {score}%
             </p>
-            <p className="text-xs text-gray-500">Readiness</p>
+            <p className="text-xs text-gray-500">{t("Readiness")}</p>
           </div>
         </div>
 
@@ -80,10 +83,10 @@ function ReadinessScore({
             <Award size={18} />
             <span>
               {score >= 80
-                ? "Excellent preparation!"
+                ? t("Excellent preparation!")
                 : score >= 60
-                ? "Good progress!"
-                : "Keep improving!"}
+                ? t("Good progress!")
+                : t("Keep improving!")}
             </span>
           </div>
 
@@ -91,7 +94,7 @@ function ReadinessScore({
             <div key={category.name}>
               <div className="mb-2 flex justify-between text-sm">
                 <span className="text-gray-600">
-                  {category.name}
+                  {t(category.name, category.name)}
                 </span>
                 <span className="font-semibold text-gray-800">
                   {category.value}%
@@ -112,7 +115,7 @@ function ReadinessScore({
       {/* Footer */}
       <div className="mt-6 flex items-center gap-2 border-t border-gray-100 pt-4 text-sm text-gray-500">
         <TrendingUp size={17} className="text-teal-600" />
-        <span>Keep practising to improve your placement readiness.</span>
+        <span>{t("Keep practising to improve your placement readiness.")}</span>
       </div>
     </div>
   );

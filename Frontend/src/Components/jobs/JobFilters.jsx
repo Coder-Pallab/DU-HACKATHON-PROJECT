@@ -1,6 +1,9 @@
 import { Filter, RotateCcw } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function JobFilters({ filters, onFilterChange, onReset }) {
+  const { t } = useLanguage();
+
   const handleChange = (key, value) => {
     onFilterChange({
       ...filters,
@@ -20,7 +23,7 @@ function JobFilters({ filters, onFilterChange, onReset }) {
           <Filter size={19} className="text-teal-700" />
 
           <h3 className="text-base font-semibold text-gray-900">
-            Filters
+            {t("Filters")}
           </h3>
         </div>
 
@@ -30,7 +33,7 @@ function JobFilters({ filters, onFilterChange, onReset }) {
           className="flex items-center gap-1.5 text-sm font-medium text-teal-700 transition hover:text-teal-900"
         >
           <RotateCcw size={15} />
-          Reset
+          {t("Reset")}
         </button>
       </div>
 
@@ -39,7 +42,7 @@ function JobFilters({ filters, onFilterChange, onReset }) {
         {/* Job Type */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Job Type
+            {t("Job Type")}
           </label>
 
           <select
@@ -47,17 +50,17 @@ function JobFilters({ filters, onFilterChange, onReset }) {
             onChange={(e) => handleChange("type", e.target.value)}
             className={selectClass}
           >
-            <option value="All">All Types</option>
-            <option value="Internship">Internship</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
+            <option value="All">{t("All Types")}</option>
+            <option value="Internship">{t("Internship")}</option>
+            <option value="Full-time">{t("Full-time")}</option>
+            <option value="Part-time">{t("Part-time")}</option>
           </select>
         </div>
 
         {/* Work Mode */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Work Mode
+            {t("Work Mode")}
           </label>
 
           <select
@@ -65,17 +68,17 @@ function JobFilters({ filters, onFilterChange, onReset }) {
             onChange={(e) => handleChange("mode", e.target.value)}
             className={selectClass}
           >
-            <option value="All">All Modes</option>
-            <option value="Remote">Remote</option>
-            <option value="On-site">On-site</option>
-            <option value="Hybrid">Hybrid</option>
+            <option value="All">{t("All Modes")}</option>
+            <option value="Remote">{t("Remote")}</option>
+            <option value="On-site">{t("On-site")}</option>
+            <option value="Hybrid">{t("Hybrid")}</option>
           </select>
         </div>
 
         {/* Location */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Location
+            {t("Location")}
           </label>
 
           <select
@@ -83,30 +86,27 @@ function JobFilters({ filters, onFilterChange, onReset }) {
             onChange={(e) => handleChange("location", e.target.value)}
             className={selectClass}
           >
-            <option value="All">All Locations</option>
-            <option value="Guwahati">Guwahati</option>
-            <option value="Assam">Assam</option>
-            <option value="India">India</option>
+            <option value="All">{t("All Locations")}</option>
+            <option value="Guwahati">{t("Guwahati")}</option>
+            <option value="Assam">{t("Assam")}</option>
+            <option value="India">{t("India")}</option>
           </select>
         </div>
 
         {/* Experience */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Experience
+            {t("Experience")}
           </label>
 
           <select
             value={filters.experience}
-            onChange={(e) =>
-              handleChange("experience", e.target.value)
-            }
+            onChange={(e) => handleChange("experience", e.target.value)}
             className={selectClass}
           >
-            <option value="All">All Levels</option>
-            <option value="Fresher">Fresher</option>
-            <option value="Entry-level">Entry-level</option>
-            <option value="Experienced">Experienced</option>
+            <option value="All">{t("All Experience")}</option>
+            <option value="Fresher">{t("Fresher")}</option>
+            <option value="Entry-level">{t("Entry-level")}</option>
           </select>
         </div>
 

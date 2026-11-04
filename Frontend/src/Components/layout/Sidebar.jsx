@@ -1,4 +1,5 @@
-﻿import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { useLanguage } from "../../hooks/useLanguage";
 
 import {
   LayoutDashboard,
@@ -7,10 +8,6 @@ import {
   BriefcaseBusiness,
   BookOpen,
   MessageCircle,
-  Target,
-  Building2,
-  Bookmark,
-  Bell,
   Settings,
   CircleHelp,
   X,
@@ -51,31 +48,11 @@ const navigation = [
         path: "/dashboard/counsellor",
         icon: MessageCircle,
       },
-      {
-        name: "Placement Readiness",
-        path: "/dashboard/placement",
-        icon: Target,
-      },
-      {
-        name: "Jobs & Internships",
-        path: "/dashboard/jobs",
-        icon: Building2,
-      },
     ],
   },
   {
     title: "PERSONAL",
     items: [
-      {
-        name: "Saved Items",
-        path: "/dashboard/saved",
-        icon: Bookmark,
-      },
-      {
-        name: "Notifications",
-        path: "/dashboard/notifications",
-        icon: Bell,
-      },
       {
         name: "Settings",
         path: "/dashboard/settings",
@@ -91,6 +68,7 @@ const navigation = [
 ];
 
 function Sidebar({ isOpen, onClose }) {
+  const { t } = useLanguage();
   return (
     <>
       {/* Mobile Overlay */}
@@ -109,7 +87,7 @@ function Sidebar({ isOpen, onClose }) {
         {/* Mobile Sidebar Header */}
         <div className="mb-5 flex items-center justify-between lg:hidden">
           <h2 className="font-semibold text-slate-800">
-            Navigation
+            {t("sidebar.navigation", "Navigation")}
           </h2>
 
           <button onClick={onClose} aria-label="Close menu">
@@ -121,7 +99,7 @@ function Sidebar({ isOpen, onClose }) {
           <div key={section.title} className="mb-7">
 
             <h3 className="mb-3 px-3 text-xs font-semibold tracking-wider text-slate-400">
-              {section.title}
+              {t(section.title, section.title)}
             </h3>
 
             <div className="space-y-1">
@@ -143,7 +121,7 @@ function Sidebar({ isOpen, onClose }) {
                     }
                   >
                     <Icon size={19} />
-                    {item.name}
+                    {t(item.name, item.name)}
                   </NavLink>
                 );
               })}
@@ -154,16 +132,16 @@ function Sidebar({ isOpen, onClose }) {
         {/* Sidebar Bottom Card */}
         <div className="rounded-xl bg-teal-50 p-4">
           <h3 className="font-semibold text-teal-900">
-            Need Guidance?
+            {t("sidebar.needGuidance", "Need Guidance?")}
           </h3>
 
           <p className="mt-2 text-xs leading-5 text-teal-800">
-            Explore career opportunities and plan your future with Disha.
+            {t("sidebar.needGuidanceDesc", "Explore career opportunities and plan your future with Disha.")}
           </p>
 
-          <button className="mt-3 text-sm font-semibold text-teal-700 hover:underline">
-            Explore Careers →
-          </button>
+          <Link to="/dashboard/careers" className="mt-3 inline-block text-sm font-semibold text-teal-700 hover:underline">
+            {t("sidebar.exploreCareers", "Explore Careers →")}
+          </Link>
         </div>
       </aside>
     </>

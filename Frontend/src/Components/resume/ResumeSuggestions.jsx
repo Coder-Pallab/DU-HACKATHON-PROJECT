@@ -4,8 +4,11 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function ResumeSuggestions() {
+  const { t } = useLanguage();
+
   const suggestions = [
     {
       id: 1,
@@ -64,11 +67,11 @@ function ResumeSuggestions() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Resume Improvement Suggestions
+            {t("Resume Improvement Suggestions")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Recommendations to strengthen your resume.
+            {t("Recommendations to strengthen your resume.")}
           </p>
         </div>
       </div>
@@ -92,18 +95,18 @@ function ResumeSuggestions() {
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold text-slate-800">
-                    {suggestion.title}
+                    {t(suggestion.title, suggestion.title)}
                   </h3>
 
                   <span
                     className={`rounded-full px-2.5 py-1 text-xs font-medium ${priorityStyles[suggestion.priority]}`}
                   >
-                    {suggestion.priority} Priority
+                    {t(suggestion.priority, suggestion.priority)} {t("Priority")}
                   </span>
                 </div>
 
                 <p className="text-sm leading-relaxed text-slate-500">
-                  {suggestion.description}
+                  {t(suggestion.description, suggestion.description)}
                 </p>
               </div>
 
@@ -113,7 +116,7 @@ function ResumeSuggestions() {
                 aria-label={`View suggestion: ${suggestion.title}`}
                 className="flex w-fit shrink-0 items-center gap-1 text-sm font-medium text-teal-700 transition-colors hover:text-teal-900"
               >
-                View <ArrowRight size={16} />
+                {t("View")} <ArrowRight size={16} />
               </button>
             </div>
           );
@@ -123,8 +126,8 @@ function ResumeSuggestions() {
       {/* Footer */}
       <div className="mt-6 rounded-xl bg-teal-50 p-4">
         <p className="text-sm leading-relaxed text-teal-800">
-          <strong>Remember:</strong> A strong resume highlights your skills,
-          practical experience, projects, and achievements clearly.
+          <strong>{t("Remember:")}</strong>{" "}
+          {t("A strong resume highlights your skills, practical experience, projects, and achievements clearly.")}
         </p>
       </div>
 

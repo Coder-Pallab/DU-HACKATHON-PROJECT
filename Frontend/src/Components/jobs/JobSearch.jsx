@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Search, X } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function JobSearch({ onSearch }) {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (e) => {
@@ -32,7 +34,7 @@ function JobSearch({ onSearch }) {
         type="text"
         value={searchTerm}
         onChange={handleChange}
-        placeholder="Search jobs, companies or skills..."
+        placeholder={t("Search jobs, companies or skills...")}
         className="w-full min-w-0 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
       />
 
@@ -40,7 +42,7 @@ function JobSearch({ onSearch }) {
         <button
           type="button"
           onClick={handleClear}
-          aria-label="Clear search"
+          aria-label={t("Clear search")}
           className="shrink-0 rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
         >
           <X size={18} />
@@ -51,7 +53,7 @@ function JobSearch({ onSearch }) {
         type="submit"
         className="shrink-0 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800"
       >
-        Search
+        {t("Search")}
       </button>
     </form>
   );

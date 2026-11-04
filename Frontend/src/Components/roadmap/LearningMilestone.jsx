@@ -8,6 +8,7 @@ import {
   ChevronUp,
   Target,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function LearningMilestone({
   title = "JavaScript Fundamentals",
@@ -22,6 +23,7 @@ function LearningMilestone({
   ],
   initialCompletedTopics = [],
 }) {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [completedTopics, setCompletedTopics] = useState(
@@ -55,11 +57,11 @@ function LearningMilestone({
 
           <div className="min-w-0">
             <h3 className="text-base font-bold text-slate-800 sm:text-lg">
-              {title}
+              {t(title, title)}
             </h3>
 
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              {description}
+              {t(description, description)}
             </p>
           </div>
 
@@ -67,7 +69,7 @@ function LearningMilestone({
 
         <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
           <Clock size={14} />
-          {duration}
+          {t(duration, duration)}
         </span>
 
       </div>
@@ -78,7 +80,7 @@ function LearningMilestone({
         <div className="mb-2 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
             <Target size={16} />
-            Learning Progress
+            {t("Learning Progress")}
           </div>
 
           <span className="text-sm font-bold text-teal-700">
@@ -101,7 +103,7 @@ function LearningMilestone({
         </div>
 
         <p className="mt-2 text-xs text-slate-500">
-          {completedTopics.length} of {topics.length} topics completed
+          {completedTopics.length} {t("of")} {topics.length} {t("topics completed")}
         </p>
 
       </div>
@@ -113,7 +115,7 @@ function LearningMilestone({
         aria-expanded={isExpanded}
         className="mt-5 flex w-full items-center justify-between border-t border-slate-100 pt-4 text-sm font-semibold text-teal-700 transition hover:text-teal-800"
       >
-        {isExpanded ? "Hide Learning Topics" : "View Learning Topics"}
+        {isExpanded ? t("Hide Learning Topics") : t("View Learning Topics")}
 
         {isExpanded ? (
           <ChevronUp size={19} />
@@ -156,11 +158,11 @@ function LearningMilestone({
                       : "text-slate-700"
                   }`}
                 >
-                  {index + 1}. {topic}
+                  {index + 1}. {t(topic, topic)}
                 </span>
 
                 <span className="shrink-0 text-xs text-slate-400">
-                  {isCompleted ? "Completed" : "Pending"}
+                  {isCompleted ? t("Completed") : t("Pending")}
                 </span>
 
               </button>

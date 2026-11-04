@@ -4,6 +4,7 @@ import {
   Lock,
   BookOpen,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const defaultMilestones = [
   {
@@ -46,6 +47,8 @@ const defaultMilestones = [
 function RoadmapTimeline({
   milestones = defaultMilestones,
 }) {
+  const { t } = useLanguage();
+
   const getStatusIcon = (status) => {
     if (status === "completed") {
       return <CheckCircle2 size={21} />;
@@ -71,9 +74,9 @@ function RoadmapTimeline({
   };
 
   const getStatusLabel = (status) => {
-    if (status === "completed") return "Completed";
-    if (status === "current") return "In Progress";
-    return "Upcoming";
+    if (status === "completed") return t("Completed");
+    if (status === "current") return t("In Progress");
+    return t("Upcoming");
   };
 
   return (
@@ -88,11 +91,11 @@ function RoadmapTimeline({
 
           <div>
             <h2 className="text-lg font-bold text-slate-800">
-              Learning Timeline
+              {t("Learning Timeline")}
             </h2>
 
             <p className="text-sm text-slate-500">
-              Follow your learning journey step by step.
+              {t("Follow your learning journey step by step.")}
             </p>
           </div>
         </div>
@@ -143,11 +146,11 @@ function RoadmapTimeline({
 
                 <div className="min-w-0">
                   <h3 className="font-semibold text-slate-800">
-                    {milestone.title}
+                    {t(milestone.title, milestone.title)}
                   </h3>
 
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    {milestone.description}
+                    {t(milestone.description, milestone.description)}
                   </p>
                 </div>
 
@@ -167,7 +170,7 @@ function RoadmapTimeline({
 
               <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
                 <Clock size={14} />
-                Estimated duration: {milestone.duration}
+                {t("Estimated duration:")} {t(milestone.duration, milestone.duration)}
               </div>
 
             </div>

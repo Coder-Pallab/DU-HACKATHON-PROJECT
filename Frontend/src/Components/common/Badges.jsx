@@ -1,8 +1,12 @@
+import { useLanguage } from "../../hooks/useLanguage";
+
 function Badge({
   children,
   variant = "default",
   className = ""
 }) {
+  const { t } = useLanguage();
+
   const variants = {
     default: "bg-gray-100 text-gray-700",
     success: "bg-green-100 text-green-700",
@@ -16,7 +20,7 @@ function Badge({
     <span
       className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${variants[variant]} ${className}`}
     >
-      {children}
+      {typeof children === "string" ? t(children, children) : children}
     </span>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function Modal({
   isOpen,
@@ -6,6 +7,8 @@ function Modal({
   title,
   children
 }) {
+  const { t } = useLanguage();
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -41,15 +44,15 @@ function Modal({
             id="modal-title"
             className="text-xl font-semibold text-gray-900"
           >
-            {title}
+            {typeof title === "string" ? t(title, title) : title}
           </h2>
 
           <button
             onClick={onClose}
-            aria-label="Close modal"
+            aria-label={t("Close modal")}
             className="rounded-lg px-3 py-1 text-xl text-gray-500 hover:bg-gray-100"
           >
-            &times;
+            ×
           </button>
         </div>
 

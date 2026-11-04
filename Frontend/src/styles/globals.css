@@ -19,7 +19,10 @@
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background: var(--background);
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(45, 212, 191, 0.1), transparent 34rem),
+      radial-gradient(ellipse at 94% 10%, rgba(99, 102, 241, 0.07), transparent 30rem),
+      var(--background);
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 16px;
@@ -41,6 +44,11 @@
 
   button:disabled {
     cursor: not-allowed;
+  }
+
+  button:not(:disabled),
+  a {
+    -webkit-tap-highlight-color: transparent;
   }
 
   a {
@@ -70,6 +78,10 @@
     border-radius: var(--radius-lg);
     background: var(--surface-raised);
     box-shadow: var(--shadow-card);
+    transition:
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      transform 220ms ease;
   }
 
   .ui-field {
@@ -92,6 +104,172 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
   }
+}
+
+@layer components {
+  .bg-teal-700 {
+    background-image: linear-gradient(135deg, #0f766e 0%, #0d9488 55%, #0891b2 100%);
+    transition:
+      background-position 220ms ease,
+      box-shadow 220ms ease,
+      transform 180ms ease,
+      filter 180ms ease;
+    background-size: 160% 160%;
+    background-position: 0% 50%;
+  }
+
+  .ui-field {
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ui-card:hover,
+  article[class*="rounded-"][class*="border"][class*="bg-white"]:hover {
+    border-color: rgba(20, 184, 166, 0.35);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.09), 0 4px 12px rgba(20, 184, 166, 0.06);
+    transform: translateY(-2px);
+  }
+
+  button:not(:disabled):hover {
+    filter: brightness(1.035);
+  }
+
+  button.bg-teal-700:not(:disabled):hover,
+  .bg-teal-700 button:not(:disabled):hover {
+    background-position: 100% 50%;
+    box-shadow: 0 7px 18px rgba(13, 148, 136, 0.22);
+    transform: translateY(-1px);
+  }
+
+  a:not([class*="bg-"]):hover {
+    color: var(--primary);
+  }
+
+  article {
+    animation: cardEnter 360ms both;
+  }
+
+  article:nth-child(2) {
+    animation-delay: 45ms;
+  }
+
+  article:nth-child(3) {
+    animation-delay: 90ms;
+  }
+
+  article:nth-child(4) {
+    animation-delay: 135ms;
+  }
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-radius: 0.5rem;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html[data-language="as"] body {
+  font-family: var(--font-assamese);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+html[data-language="as"] :is(.text-xs, .text-sm, .text-base, .text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl) {
+  line-height: 1.55;
+}
+
+html[data-language="as"] .text-xs {
+  font-size: 0.75rem;
+}
+
+html[data-language="as"] [class~="text-[11px]"] {
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+html[data-language="as"] .text-sm {
+  font-size: 0.875rem;
+}
+
+html[data-language="as"] .text-base {
+  font-size: 0.9375rem;
+}
+
+html[data-language="as"] .text-lg {
+  font-size: 1.0625rem;
+}
+
+html[data-language="as"] .text-xl {
+  font-size: 1.1875rem;
+}
+
+html[data-language="as"] .text-2xl {
+  font-size: 1.375rem;
+}
+
+html[data-language="as"] .text-3xl {
+  font-size: 1.625rem;
+}
+
+html[data-language="as"] .text-4xl {
+  font-size: 2rem;
+}
+
+html[data-language="as"] .text-5xl {
+  font-size: 2.5rem;
+}
+
+html[data-language="as"] .text-6xl {
+  font-size: 3rem;
+}
+
+html[data-language="as"] :is(.tracking-wide, .tracking-wider, .tracking-widest) {
+  letter-spacing: normal;
+}
+
+html[data-language="as"] :is(
+  .text-gray-900,
+  .text-slate-900,
+  .text-gray-800,
+  .text-slate-800
+) {
+  color: #1e293b;
+}
+
+html[data-language="as"] :is(
+  .text-gray-700,
+  .text-slate-700,
+  .text-gray-600,
+  .text-slate-600
+) {
+  color: #334155;
+}
+
+html[data-language="as"] :is(
+  .text-gray-500,
+  .text-slate-500,
+  .text-gray-400,
+  .text-slate-400
+) {
+  color: #475569;
 }
 
 @media (prefers-reduced-motion: reduce) {

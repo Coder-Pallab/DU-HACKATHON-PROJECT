@@ -1,7 +1,12 @@
-﻿import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Button from "../common/Button";
+import { useLanguage } from "../../hooks/useLanguage";
+import { useNavigate } from "react-router-dom";
 
-function WelcomeCard({ name = "Student" }) {
+function WelcomeCard({ name = "there" }) {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-800 to-teal-600 p-6 text-white md:p-8">
 
@@ -10,25 +15,24 @@ function WelcomeCard({ name = "Student" }) {
         <div className="mb-3 flex items-center gap-2 text-teal-100">
           <Sparkles size={18} />
           <span className="text-sm font-medium">
-            Your Career Journey Starts Here
+            {t("Your Career Journey Starts Here")}
           </span>
         </div>
 
         <h1 className="text-2xl font-bold md:text-3xl">
-          Welcome back, {name}! 👋
+          {t("Welcome back,")} {name}! 👋
         </h1>
 
         <p className="mt-3 text-sm leading-6 text-teal-100 md:text-base">
-          Discover your strengths, explore career opportunities,
-          and take the next step towards your dream career.
+          {t("Discover your strengths, explore career opportunities, and take the next step towards your dream career.")}
         </p>
 
         <Button
           variant="secondary"
           className="mt-6"
-          onClick={() => console.log("Explore careers")}
+          onClick={() => navigate("/dashboard/careers")}
         >
-          Explore Careers
+          {t("Explore Careers")}
           <ArrowRight size={17} className="ml-2 inline" />
         </Button>
 

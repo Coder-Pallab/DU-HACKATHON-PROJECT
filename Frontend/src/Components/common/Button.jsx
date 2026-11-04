@@ -1,3 +1,5 @@
+import { useLanguage } from "../../hooks/useLanguage";
+
 function Button({
   children,
   variant = "primary",
@@ -9,6 +11,8 @@ function Button({
   className = "",
   ...props
 }) {
+  const { t } = useLanguage();
+
   const baseStyles =
     "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -43,7 +47,7 @@ function Button({
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
-      {loading ? "Please wait..." : children}
+      {loading ? t("Please wait...") : (typeof children === "string" ? t(children, children) : children)}
     </button>
   );
 }

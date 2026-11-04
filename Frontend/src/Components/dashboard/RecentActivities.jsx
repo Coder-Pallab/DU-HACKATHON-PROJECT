@@ -1,6 +1,8 @@
 import { Clock, CheckCircle2, BookOpen, UserRound } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function RecentActivities() {
+  const { t } = useLanguage();
 
   const activities = [
     {
@@ -30,11 +32,11 @@ function RecentActivities() {
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
       <h2 className="text-lg font-bold text-slate-900">
-        Recent Activities
+        {t("Recent Activities")}
       </h2>
 
       <p className="mt-1 text-sm text-slate-500">
-        Your latest activities on Disha.
+        {t("Your latest activities on Disha.")}
       </p>
 
       <div className="mt-6 space-y-6">
@@ -52,17 +54,17 @@ function RecentActivities() {
               <div className="min-w-0 flex-1">
 
                 <h3 className="text-sm font-semibold text-slate-800">
-                  {activity.title}
+                  {t(activity.title, activity.title)}
                 </h3>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  {activity.description}
+                  {t(activity.description, activity.description)}
                 </p>
 
-                <p className="mt-2 flex items-center gap-1 text-xs text-slate-400">
-                  <Clock size={12} />
-                  {activity.time}
-                </p>
+                <div className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+                  <Clock size={13} />
+                  <span>{t(activity.time, activity.time)}</span>
+                </div>
 
               </div>
 

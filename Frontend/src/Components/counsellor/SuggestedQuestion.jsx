@@ -5,6 +5,7 @@ import {
   BookOpen,
   TrendingUp,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const questions = [
   {
@@ -35,10 +36,12 @@ const questions = [
 ];
 
 function SuggestedQuestions({ onSelect }) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-gray-700">
-        Suggested questions
+        {t("Suggested questions")}
       </h3>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -58,11 +61,11 @@ function SuggestedQuestions({ onSelect }) {
 
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-800">
-                  {item.title}
+                  {t(item.title, item.title)}
                 </p>
 
                 <p className="mt-1 text-xs leading-relaxed text-gray-500">
-                  {item.question}
+                  {t(item.question, item.question)}
                 </p>
               </div>
             </button>

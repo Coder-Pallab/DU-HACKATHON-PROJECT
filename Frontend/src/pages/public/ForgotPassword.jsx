@@ -8,13 +8,18 @@ import {
   KeyRound,
   CheckCircle2,
 } from "lucide-react";
+import { authService } from "../../services/authService";
+import { getApiErrorMessage } from "../../services/apiClient";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -22,11 +27,18 @@ function ForgotPassword() {
       return;
     }
 
-    // Frontend demo only. No reset email is actually sent.
-    console.log("Password reset requested for:", email);
-
     setError("");
-    setSubmitted(true);
+    setIsSubmitting(true);
+    try {
+      const response = await authService.forgotPassword(email.trim());
+      setMessage(response.message || response.data?.message || "If an account with this email exists, a password reset token has been issued.");
+      setResetToken(response.data?.resetToken || "");
+      setSubmitted(true);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -141,10 +153,11 @@ function ForgotPassword() {
 
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800"
+                    disabled={isSubmitting}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Send Reset Link
-                    <ArrowRight size={18} />
+                    {isSubmitting ? "Submitting..." : "Request Password Reset"}
+                    {!isSubmitting && <ArrowRight size={18} />}
                   </button>
 
                 </form>
@@ -161,17 +174,22 @@ function ForgotPassword() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-7 text-gray-500">
-                  Your password reset request has been recorded for:
+                  {message}
                 </p>
 
-                <p className="mt-2 break-all font-semibold text-teal-700">
-                  {email}
-                </p>
-
-                <p className="mt-4 text-sm text-gray-500">
-                  This is a frontend demonstration. No reset email
-                  has actually been sent.
-                </p>
+                {resetToken && (
+                  <div className="mt-4 rounded-lg bg-amber-50 p-3 text-left">
+                    <p className="text-xs text-amber-800">
+                      The development API returned a reset token. Use it to set a new password:
+                    </p>
+                    <Link
+                      to={`/reset-password?token=${encodeURIComponent(resetToken)}`}
+                      className="mt-2 inline-block text-sm font-semibold text-teal-700 hover:underline"
+                    >
+                      Continue to reset password
+                    </Link>
+                  </div>
+                )}
 
                 <button
                   type="button"

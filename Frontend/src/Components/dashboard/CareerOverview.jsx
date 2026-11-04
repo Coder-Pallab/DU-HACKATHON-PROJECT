@@ -2,10 +2,11 @@ import { ArrowUpRight, BriefcaseBusiness } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import Badge from "../common/Badges";
+import { useLanguage } from "../../hooks/useLanguage";
 
-import { careers } from "../../data/careers";
+function CareerOverview({ recommendations = [] }) {
+  const { t } = useLanguage();
 
-function CareerOverview() {
   return (
     <section>
 
@@ -13,11 +14,11 @@ function CareerOverview() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-900">
-            Recommended Careers
+            {t("Recommended Careers")}
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Explore career paths that match your interests.
+            {t("Explore career paths that match your interests.")}
           </p>
         </div>
 
@@ -25,7 +26,7 @@ function CareerOverview() {
           to="/dashboard/careers"
           className="flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-900"
         >
-          View All
+          {t("View All")}
           <ArrowUpRight size={17} />
         </Link>
 
@@ -33,10 +34,10 @@ function CareerOverview() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
 
-        {careers.map((career) => (
+        {recommendations.slice(0, 3).map((career) => (
 
           <div
-            key={career.id}
+            key={career._id || career.career}
             className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
 
@@ -47,32 +48,32 @@ function CareerOverview() {
               </div>
 
               <Badge variant="success">
-                {career.match}% Match
+                {career.matchPercentage}% {t("Match")}
               </Badge>
 
             </div>
 
             <h3 className="mt-4 text-lg font-bold text-slate-900">
-              {career.title}
+              {t(career.careerTitle, career.careerTitle)}
             </h3>
 
             <p className="mt-1 text-xs font-medium text-teal-700">
-              {career.category}
+              {t(career.sector || "Career", career.sector || "Career")}
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              {career.description}
+              {t(career.careerFitSummary || career.careerDescription, career.careerFitSummary || career.careerDescription)}
             </p>
 
             <div className="mt-4">
 
               <p className="text-xs font-semibold text-slate-500">
-                REQUIRED SKILLS
+                {t("MATCHING SKILLS")}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
 
-                {career.skills.map((skill) => (
+                {(career.matchingSkills || []).slice(0, 5).map((skill) => (
                   <span
                     key={skill}
                     className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-600"
@@ -88,11 +89,11 @@ function CareerOverview() {
             <div className="mt-5 border-t border-slate-100 pt-4">
 
               <p className="text-xs text-slate-500">
-                Estimated Salary
+                {t("Skill Gaps")}
               </p>
 
               <p className="mt-1 font-semibold text-slate-800">
-                {career.salary}
+                {career.missingSkills?.length ? `${career.missingSkills.length} skill gaps to address` : "No gaps reported"}
               </p>
 
             </div>
@@ -102,6 +103,11 @@ function CareerOverview() {
         ))}
 
       </div>
+      {recommendations.length === 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
+          Career recommendations have not been generated yet.
+        </div>
+      )}
 
     </section>
   );

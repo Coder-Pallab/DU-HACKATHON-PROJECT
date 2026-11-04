@@ -1,28 +1,38 @@
 import { useState } from "react";
 import { Languages, Check } from "lucide-react";
 import Button from "../common/Button";
+import { useLanguage } from "../../hooks/useLanguage";
+import { studentService } from "../../services/studentService";
+import { getApiErrorMessage } from "../../services/apiClient";
 
-function LanguageSelector() {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+function LanguageSelector({ profile, onSaved }) {
+  const { language: currentGlobalLang, setLanguage, languages, t } = useLanguage();
+  const savedLanguage = profile.preferredLanguage === "Assamese" ? "as" : "en";
+  const [selectedLanguage, setSelectedLanguage] = useState(profile.preferredLanguage ? savedLanguage : currentGlobalLang);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const languages = [
-    {
-      code: "en",
-      name: "English",
-      nativeName: "English",
-      description: "Continue using Disha in English.",
-    },
-    {
-      code: "as",
-      name: "Assamese",
-      nativeName: "অসমীয়া",
-      description: "Disha ব্যৱহাৰ কৰক অসমীয়া ভাষাত।",
-    },
-  ];
+  const descriptions = {
+    en: "Continue using Disha in English.",
+    as: "Disha ব্যৱহাৰ কৰক অসমীয়া ভাষাত।",
+  };
 
-  const handleSubmit = () => {
-    console.log("Selected Language:", selectedLanguage);
-    alert("Language preference saved successfully!");
+  const handleSubmit = async () => {
+    setIsSaving(true);
+    setError("");
+    setSaved(false);
+    const preferredLanguage = selectedLanguage === "as" ? "Assamese" : "English";
+    try {
+      const updated = await studentService.updatePreferences({ preferredLanguage });
+      onSaved(updated);
+      setLanguage(selectedLanguage);
+      setSaved(true);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -36,11 +46,11 @@ function LanguageSelector() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Language Preference
+            {t("Language Preference")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Choose your preferred language.
+            {t("Choose your preferred language.")}
           </p>
         </div>
       </div>
@@ -52,6 +62,7 @@ function LanguageSelector() {
             key={language.code}
             type="button"
             onClick={() => setSelectedLanguage(language.code)}
+            aria-pressed={selectedLanguage === language.code}
             className={`relative rounded-xl border p-5 text-left transition ${
               selectedLanguage === language.code
                 ? "border-teal-600 bg-teal-50"
@@ -75,16 +86,18 @@ function LanguageSelector() {
             </p>
 
             <p className="mt-2 text-sm text-slate-600">
-              {language.description}
+              {descriptions[language.code] || ""}
             </p>
           </button>
         ))}
       </div>
 
       {/* Save Button */}
+      {error && <p role="alert" className="mt-4 text-sm text-red-700">{error}</p>}
+      {saved && <p role="status" className="mt-4 text-sm text-green-700">{t("Language preference saved successfully!")}</p>}
       <div className="mt-6 flex justify-end border-t border-slate-100 pt-5">
-        <Button type="button" onClick={handleSubmit}>
-          Save Language
+        <Button type="button" onClick={handleSubmit} loading={isSaving}>
+          {t("Save Language")}
         </Button>
       </div>
     </div>

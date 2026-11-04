@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-
 import {
   UserRound,
   FileText,
@@ -7,6 +6,7 @@ import {
   BookOpen,
   ArrowRight,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const actions = [
   {
@@ -36,15 +36,17 @@ const actions = [
 ];
 
 function QuickActions() {
+  const { t } = useLanguage();
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
       <h2 className="text-lg font-bold text-slate-900">
-        Quick Actions
+        {t("Quick Actions")}
       </h2>
 
       <p className="mt-1 text-sm text-slate-500">
-        Access your important features quickly.
+        {t("Access your important features quickly.")}
       </p>
 
       <div className="mt-5 space-y-3">
@@ -66,11 +68,11 @@ function QuickActions() {
               <div className="min-w-0 flex-1">
 
                 <h3 className="text-sm font-semibold text-slate-800">
-                  {action.title}
+                  {t(action.title, action.title)}
                 </h3>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  {action.description}
+                  {t(action.description, action.description)}
                 </p>
 
               </div>

@@ -5,6 +5,7 @@ import {
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function RoadmapCard({
   title = "Frontend Developer",
@@ -15,6 +16,8 @@ function RoadmapCard({
   level = "Beginner to Advanced",
   onViewRoadmap,
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-6">
 
@@ -26,7 +29,7 @@ function RoadmapCard({
         </div>
 
         <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">
-          {level}
+          {t(level, level)}
         </span>
 
       </div>
@@ -34,11 +37,11 @@ function RoadmapCard({
       {/* Title and Description */}
       <div className="mb-5">
         <h3 className="text-lg font-bold text-slate-800">
-          {title}
+          {t(title, title)}
         </h3>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          {description}
+          {t(description, description)}
         </p>
       </div>
 
@@ -48,22 +51,22 @@ function RoadmapCard({
         <div className="rounded-xl bg-slate-50 p-3">
           <div className="mb-2 flex items-center gap-2 text-slate-500">
             <Clock size={16} />
-            <span className="text-xs">Duration</span>
+            <span className="text-xs">{t("Duration")}</span>
           </div>
 
           <p className="text-sm font-semibold text-slate-800">
-            {duration}
+            {t(duration, duration)}
           </p>
         </div>
 
         <div className="rounded-xl bg-slate-50 p-3">
           <div className="mb-2 flex items-center gap-2 text-slate-500">
             <Target size={16} />
-            <span className="text-xs">Milestones</span>
+            <span className="text-xs">{t("Milestones")}</span>
           </div>
 
           <p className="text-sm font-semibold text-slate-800">
-            {milestones} Steps
+            {milestones} {t("Steps")}
           </p>
         </div>
 
@@ -74,7 +77,7 @@ function RoadmapCard({
 
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm font-medium text-slate-600">
-            Your Progress
+            {t("Your Progress")}
           </span>
 
           <span className="text-sm font-bold text-teal-700">
@@ -98,7 +101,7 @@ function RoadmapCard({
 
         <div className="flex items-center gap-1.5 text-xs text-slate-500">
           <TrendingUp size={15} className="text-teal-600" />
-          Career-focused learning
+          {t("Career-focused learning")}
         </div>
 
         <button
@@ -106,7 +109,7 @@ function RoadmapCard({
           onClick={onViewRoadmap}
           className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
         >
-          View Roadmap
+          {t("View Roadmap")}
           <ArrowRight size={16} />
         </button>
 

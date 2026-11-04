@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 import PageHeader from "../../Components/layout/PageHeader";
 import {
   Search,
@@ -8,7 +9,6 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  Send,
   BookOpen,
   UserRound,
   FileText,
@@ -22,7 +22,7 @@ const faqs = [
     category: "Account",
     question: "How can I create an account on Disha?",
     answer:
-      "Visit the Signup page, enter your name, email, phone number and password, then complete the registration form. Account creation is currently a frontend demonstration.",
+      "Create a student account from Sign Up with your name, email address, password, and optional phone number. Admin and recruiter registration are not supported.",
   },
   {
     id: 2,
@@ -36,42 +36,42 @@ const faqs = [
     category: "Resume",
     question: "Which resume file formats are supported?",
     answer:
-      "The resume section currently supports PDF, DOC and DOCX files with a maximum file size of 5 MB. Files are handled locally in this frontend demonstration.",
+      "The resume API accepts PDF and DOCX files up to 10 MB. Uploaded files are stored by the backend and can be listed, downloaded, parsed, analyzed, or deleted from Resume & Skills.",
   },
   {
     id: 4,
     category: "Careers",
     question: "How does Disha recommend careers?",
     answer:
-      "The Career Matches section displays sample career recommendations. Actual personalized recommendations require a future recommendation system.",
+      "Career recommendations use the skills, interests, and academic information saved in your student profile. Refresh recommendations after updating those details.",
   },
   {
     id: 5,
     category: "Learning",
     question: "Can I track my learning progress?",
     answer:
-      "Yes. The Learning Roadmap section displays learning milestones and sample courses. Progress is currently demonstration data.",
+      "Generate a roadmap for a career and update each phase as not started, in progress, or completed. The current backend provides activities and progress tracking, but not a course catalog.",
   },
   {
     id: 6,
     category: "Jobs",
     question: "Can I apply for jobs through Disha?",
     answer:
-      "You can explore sample job and internship listings and try the application interface. Actual applications are not submitted to employers yet.",
+      "The current backend does not provide job listings, application, or placement-readiness APIs, so these features are unavailable in the connected interface.",
   },
   {
     id: 7,
     category: "AI Counsellor",
     question: "Is the AI Counsellor fully functional?",
     answer:
-      "The current AI Counsellor is a frontend demo with predefined responses. A real AI service will need to be connected in a future development phase.",
+      "The counsellor sends your messages to the backend AI service and saves conversation history. Responses depend on the backend Gemini configuration. English and Assamese are supported.",
   },
   {
     id: 8,
     category: "Language",
     question: "Does Disha support Assamese?",
     answer:
-      "Disha is designed for English and Assamese language support. Full translation across every page is still a future integration task.",
+      "You can save English or Assamese as your preferred language. The counsellor request uses that language selection; translated labels are available where the frontend has translations.",
   },
 ];
 
@@ -103,17 +103,9 @@ const categories = [
 ];
 
 function HelpSupport() {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFaq, setActiveFaq] = useState(null);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    category: "General Inquiry",
-    message: "",
-  });
-
-  const [submitted, setSubmitted] = useState(false);
 
   const filteredFaqs = faqs.filter((faq) => {
     const search = searchTerm.toLowerCase();
@@ -124,37 +116,6 @@ function HelpSupport() {
       faq.category.toLowerCase().includes(search)
     );
   });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-
-    setSubmitted(false);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    console.log("Support Request:", formData);
-
-    setSubmitted(true);
-
-    setFormData({
-      name: "",
-      email: "",
-      category: "General Inquiry",
-      message: "",
-    });
-  };
 
   return (
     <div className="w-full min-w-0 space-y-7">
@@ -174,12 +135,11 @@ function HelpSupport() {
           </div>
 
           <h2 className="text-2xl font-bold sm:text-3xl">
-            How can we help you?
+            {t("How can we help you?")}
           </h2>
 
           <p className="mt-3 text-sm leading-6 text-teal-100 sm:text-base">
-            Explore our help center to find answers about your account,
-            career guidance, learning roadmap and more.
+            {t("Explore our help center to find answers about your account, career guidance, learning roadmap and more.")}
           </p>
 
           <div className="mt-6 flex items-center gap-3 rounded-xl bg-white px-4 py-3">
@@ -188,7 +148,7 @@ function HelpSupport() {
 
             <input
               type="text"
-              placeholder="Search your questions..."
+              placeholder={t("Search your questions...")}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -207,11 +167,11 @@ function HelpSupport() {
 
         <div className="mb-5">
           <h2 className="text-lg font-semibold text-gray-900">
-            Browse Help Topics
+            {t("Browse Help Topics")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Find assistance based on your requirements.
+            {t("Find assistance based on your requirements.")}
           </p>
         </div>
 
@@ -231,11 +191,11 @@ function HelpSupport() {
                 </div>
 
                 <h3 className="font-semibold text-gray-900">
-                  {category.title}
+                  {t(category.title, category.title)}
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-gray-500">
-                  {category.description}
+                  {t(category.description, category.description)}
                 </p>
 
               </div>
@@ -250,11 +210,11 @@ function HelpSupport() {
 
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900">
-            Frequently Asked Questions
+            {t("Frequently Asked Questions")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Find quick answers to common questions.
+            {t("Find quick answers to common questions.")}
           </p>
         </div>
 
@@ -281,11 +241,11 @@ function HelpSupport() {
 
                     <div>
                       <span className="mb-2 inline-block rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">
-                        {faq.category}
+                        {t(faq.category, faq.category)}
                       </span>
 
                       <h3 className="text-sm font-semibold leading-6 text-gray-800">
-                        {faq.question}
+                        {t(faq.question, faq.question)}
                       </h3>
                     </div>
 
@@ -306,7 +266,7 @@ function HelpSupport() {
                   {isOpen && (
                     <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 sm:px-5">
                       <p className="text-sm leading-7 text-gray-600">
-                        {faq.answer}
+                        {t(faq.answer, faq.answer)}
                       </p>
                     </div>
                   )}
@@ -324,11 +284,11 @@ function HelpSupport() {
               />
 
               <h3 className="mt-3 font-semibold text-gray-800">
-                No matching questions
+                {t("No matching questions")}
               </h3>
 
               <p className="mt-2 text-sm text-gray-500">
-                Try searching with a different keyword.
+                {t("Try searching with a different keyword.")}
               </p>
             </div>
 
@@ -345,12 +305,11 @@ function HelpSupport() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Still need help?
+              {t("Still need help?")}
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-gray-500">
-              Can't find the answer? Use the support form to describe
-              your issue.
+              {t("Can't find the answer? Use the support form to describe your issue.")}
             </p>
           </div>
 
@@ -363,11 +322,11 @@ function HelpSupport() {
 
               <div>
                 <h3 className="font-semibold text-gray-800">
-                  Support Center
+                  {t("Support Center")}
                 </h3>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  We're here to help you.
+                  {t("We're here to help you.")}
                 </p>
               </div>
             </div>
@@ -379,11 +338,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Email Support
+                    {t("Email Support")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Support contact coming soon
+                    {t("Support contact coming soon")}
                   </p>
                 </div>
               </div>
@@ -393,11 +352,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Phone Support
+                    {t("Phone Support")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Contact information coming soon
+                    {t("Contact information coming soon")}
                   </p>
                 </div>
               </div>
@@ -407,11 +366,11 @@ function HelpSupport() {
 
                 <div>
                   <p className="text-xs text-gray-400">
-                    Help Resources
+                    {t("Help Resources")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium text-gray-700">
-                    Disha Help Center
+                    {t("Disha Help Center")}
                   </p>
                 </div>
               </div>
@@ -421,107 +380,11 @@ function HelpSupport() {
           </div>
         </div>
 
-        {/* Support Form */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7 xl:col-span-3">
-
-          <h2 className="text-lg font-semibold text-gray-900">
-            Send us a message
-          </h2>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Describe your issue and we'll help you.
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7 xl:col-span-3">
+          <h2 className="text-lg font-semibold text-amber-900">Support contact unavailable</h2>
+          <p className="mt-2 text-sm leading-6 text-amber-800">
+            The current backend does not provide a support-request endpoint or published email/phone contact. This page will not pretend to submit a support ticket.
           </p>
-
-          {submitted && (
-            <div className="mt-5 rounded-xl border border-green-100 bg-green-50 p-4 text-sm text-green-700">
-              Your support request has been recorded in this demo.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Full Name *
-                </label>
-
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your name"
-                  required
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Email Address *
-                </label>
-
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  required
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-                />
-              </div>
-
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Support Category
-              </label>
-
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              >
-                <option>General Inquiry</option>
-                <option>Account Problem</option>
-                <option>Resume Problem</option>
-                <option>Career Guidance</option>
-                <option>Technical Issue</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Your Message *
-              </label>
-
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder="Describe your issue..."
-                rows={5}
-                required
-                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 sm:w-auto"
-            >
-              <Send size={17} />
-              Submit Request
-            </button>
-
-          </form>
-
         </div>
 
       </section>

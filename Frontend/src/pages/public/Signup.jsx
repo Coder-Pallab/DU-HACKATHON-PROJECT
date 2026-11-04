@@ -10,10 +10,16 @@ import {
   EyeOff,
   ArrowRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { getApiErrorMessage } from "../../services/apiClient";
 
 function Signup() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -37,11 +43,16 @@ function Signup() {
     setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password.length < 8) {
       setError("Password must contain at least 8 characters.");
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(formData.password) || !/\d/.test(formData.password)) {
+      setError("Password must contain at least one letter and one number.");
       return;
     }
 
@@ -55,10 +66,21 @@ function Signup() {
       return;
     }
 
-    // Frontend demo only. No account is created yet.
-    console.log("Signup form submitted:", formData);
-
-    alert("Signup form submitted! Backend registration is not connected yet.");
+    setIsSubmitting(true);
+    setError("");
+    try {
+      await register({
+        name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        phone: formData.phone.trim(),
+      });
+      navigate("/dashboard", { replace: true });
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -295,10 +317,11 @@ function Signup() {
               {/* Submit */}
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800"
+                disabled={isSubmitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Create Account
-                <ArrowRight size={18} />
+                {isSubmitting ? "Creating account..." : "Create Account"}
+                {!isSubmitting && <ArrowRight size={18} />}
               </button>
 
             </form>

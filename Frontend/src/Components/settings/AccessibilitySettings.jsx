@@ -6,6 +6,7 @@ import {
   Zap,
   Save,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function Toggle({ checked, onChange }) {
   return (
@@ -28,6 +29,7 @@ function Toggle({ checked, onChange }) {
 }
 
 function AccessibilitySettings({ initialSettings, onSave }) {
+  const { t } = useLanguage();
   const [settings, setSettings] = useState({
     fontSize: "medium",
     reducedMotion: false,
@@ -48,7 +50,7 @@ function AccessibilitySettings({ initialSettings, onSave }) {
 
   const handleSave = () => {
     onSave?.(settings);
-    setMessage("Accessibility preferences saved successfully!");
+    setMessage(t("Accessibility preferences saved successfully!"));
   };
 
   return (
@@ -61,11 +63,11 @@ function AccessibilitySettings({ initialSettings, onSave }) {
 
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Accessibility Settings
+            {t("Accessibility Settings")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Customize Disha to make your experience more comfortable.
+            {t("Customize Disha to make your experience more comfortable.")}
           </p>
         </div>
       </div>
@@ -77,7 +79,7 @@ function AccessibilitySettings({ initialSettings, onSave }) {
           <div className="mb-3 flex items-center gap-2">
             <Type size={19} className="text-teal-700" />
             <h3 className="font-semibold text-gray-800">
-              Font Size
+              {t("Font Size")}
             </h3>
           </div>
 
@@ -94,7 +96,7 @@ function AccessibilitySettings({ initialSettings, onSave }) {
                     : "border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                {size}
+                {t(size, size)}
               </button>
             ))}
           </div>
@@ -107,11 +109,11 @@ function AccessibilitySettings({ initialSettings, onSave }) {
 
             <div>
               <h3 className="font-semibold text-gray-800">
-                Reduced Motion
+                {t("Reduced Motion")}
               </h3>
 
               <p className="mt-1 text-sm text-gray-500">
-                Minimize animations and visual transitions.
+                {t("Minimize animations and visual transitions.")}
               </p>
             </div>
           </div>
@@ -131,11 +133,11 @@ function AccessibilitySettings({ initialSettings, onSave }) {
 
             <div>
               <h3 className="font-semibold text-gray-800">
-                High Contrast
+                {t("High Contrast")}
               </h3>
 
               <p className="mt-1 text-sm text-gray-500">
-                Improve visual contrast between text and backgrounds.
+                {t("Improve visual contrast between text and backgrounds.")}
               </p>
             </div>
           </div>
@@ -167,7 +169,7 @@ function AccessibilitySettings({ initialSettings, onSave }) {
           className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-teal-800"
         >
           <Save size={17} />
-          Save Preferences
+          {t("Save Preferences")}
         </button>
       </div>
     </div>

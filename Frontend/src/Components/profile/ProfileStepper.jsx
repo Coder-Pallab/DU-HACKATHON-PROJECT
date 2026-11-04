@@ -5,44 +5,55 @@ import {
   BriefcaseBusiness,
   Check,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
-function ProfileStepper({ currentStep = 1 }) {
+function ProfileStepper({ profile }) {
+  const { t } = useLanguage();
+
   const steps = [
     {
       id: 1,
       title: "Personal Details",
       icon: UserRound,
+      completed: Boolean(profile?.fullName),
     },
     {
       id: 2,
       title: "Education",
       icon: GraduationCap,
+      completed: Boolean(profile?.college && profile?.degree && profile?.department && profile?.graduationYear),
     },
     {
       id: 3,
       title: "Language",
       icon: Languages,
+      completed: Boolean(profile?.preferredLanguage),
     },
     {
       id: 4,
       title: "Career Interests",
       icon: BriefcaseBusiness,
+      completed: Boolean(profile?.careerInterests?.length),
     },
   ];
+
+  const completedSteps = steps.filter((step) => step.completed).length;
+  const progress = Math.round((completedSteps / steps.length) * 100);
+  const activeStep = steps.find((step) => !step.completed)?.id || steps.length;
 
   return (
     <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
       <h2 className="mb-6 text-lg font-semibold text-slate-800">
-        Profile Setup Progress
+        {t("Profile Setup Progress")}
       </h2>
 
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         {steps.map((step, index) => {
           const Icon = step.icon;
 
-          const isCompleted = step.id < currentStep;
-          const isActive = step.id === currentStep;
+          const isCompleted = step.completed;
+          const isActive = step.id === activeStep;
 
           return (
             <div
@@ -75,11 +86,11 @@ function ProfileStepper({ currentStep = 1 }) {
                       : "text-slate-400"
                   }`}
                 >
-                  Step {step.id}
+                  {t("Step")} {step.id}
                 </p>
 
                 <p className="text-sm text-slate-600">
-                  {step.title}
+                  {t(step.title, step.title)}
                 </p>
               </div>
 
@@ -98,22 +109,15 @@ function ProfileStepper({ currentStep = 1 }) {
 
       {/* Progress */}
       <div className="mt-7">
-        <div className="mb-2 flex justify-between text-sm">
-          <span className="font-medium text-slate-600">
-            Overall Progress
-          </span>
-
-          <span className="font-semibold text-teal-700">
-            {Math.round(((currentStep - 1) / steps.length) * 100)}%
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500">
+            {progress}% {t("completed")}
           </span>
         </div>
-
-        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-teal-600 transition-all duration-500"
-            style={{
-              width: `${((currentStep - 1) / steps.length) * 100}%`,
-            }}
+            className="h-full rounded-full bg-teal-600 transition-all duration-300"
+            style={{ width: `${progress}%` }}
           />
         </div>
       </div>

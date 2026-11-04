@@ -2,30 +2,41 @@ import { useState } from "react";
 import { GraduationCap } from "lucide-react";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import { useLanguage } from "../../hooks/useLanguage";
+import { studentService } from "../../services/studentService";
+import { getApiErrorMessage } from "../../services/apiClient";
 
-function EducationDetails() {
-  const [formData, setFormData] = useState({
-    educationLevel: "",
-    institution: "",
-    course: "",
-    specialization: "",
-    graduationYear: "",
-  });
+function EducationDetails({ profile, onChange, onSaved }) {
+  const { t } = useLanguage();
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Education Details:", formData);
-    alert("Education details saved successfully!");
+    setIsSaving(true);
+    setError("");
+    setSaved(false);
+    const payload = {
+      ...(profile.college ? { college: profile.college } : {}),
+      ...(profile.university ? { university: profile.university } : {}),
+      ...(profile.degree ? { degree: profile.degree } : {}),
+      ...(profile.department ? { department: profile.department } : {}),
+      ...(profile.semester ? { semester: Number(profile.semester) } : {}),
+      ...(profile.graduationYear ? { graduationYear: Number(profile.graduationYear) } : {}),
+      ...(profile.cgpa !== "" && profile.cgpa !== null && profile.cgpa !== undefined
+        ? { cgpa: Number(profile.cgpa) }
+        : {}),
+    };
+    try {
+      const updated = await studentService.updateAcademicDetails(payload);
+      onSaved(updated);
+      setSaved(true);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -39,11 +50,11 @@ function EducationDetails() {
 
         <div>
           <h2 className="text-lg font-semibold text-slate-800">
-            Education Details
+            {t("Education Details")}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Tell us about your academic background.
+            {t("Tell us about your academic background.")}
           </p>
         </div>
       </div>
@@ -53,74 +64,76 @@ function EducationDetails() {
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-          {/* Education Level */}
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="educationLevel"
-              className="text-sm font-medium text-slate-700"
-            >
-              Education Level
-            </label>
-
-            <select
-              id="educationLevel"
-              name="educationLevel"
-              value={formData.educationLevel}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-            >
-              <option value="">Select education level</option>
-              <option value="10th">10th Standard</option>
-              <option value="12th">12th Standard</option>
-              <option value="diploma">Diploma</option>
-              <option value="undergraduate">Undergraduate</option>
-              <option value="postgraduate">Postgraduate</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
           <Input
-            label="Institution Name"
-            name="institution"
-            placeholder="Enter school or college name"
-            value={formData.institution}
-            onChange={handleChange}
-            required
+          label="College / Institution"
+          name="college"
+          value={profile.college || ""}
+          onChange={(event) => onChange("college", event.target.value)}
           />
 
           <Input
-            label="Course / Degree"
-            name="course"
-            placeholder="e.g. BCA, B.Tech, B.Sc"
-            value={formData.course}
-            onChange={handleChange}
-            required
+          label="University"
+          name="university"
+          value={profile.university || ""}
+          onChange={(event) => onChange("university", event.target.value)}
           />
 
           <Input
-            label="Specialization"
-            name="specialization"
-            placeholder="e.g. Computer Science"
-            value={formData.specialization}
-            onChange={handleChange}
+          label="Course / Degree"
+          name="degree"
+          placeholder="e.g. BCA, B.Tech, B.Sc"
+          value={profile.degree || ""}
+          onChange={(event) => onChange("degree", event.target.value)}
           />
 
           <Input
-            label="Graduation Year"
-            name="graduationYear"
-            type="number"
-            placeholder="e.g. 2027"
-            value={formData.graduationYear}
-            onChange={handleChange}
+          label="Department"
+          name="department"
+          placeholder="e.g. Computer Science"
+          value={profile.department || ""}
+          onChange={(event) => onChange("department", event.target.value)}
+          />
+
+          <Input
+          label="Semester"
+          name="semester"
+          type="number"
+          min="1"
+          max="12"
+          value={profile.semester || ""}
+          onChange={(event) => onChange("semester", event.target.value)}
+          />
+
+          <Input
+          label="Graduation Year"
+          name="graduationYear"
+          type="number"
+          placeholder="e.g. 2027"
+          min="2000"
+          max="2100"
+          value={profile.graduationYear || ""}
+          onChange={(event) => onChange("graduationYear", event.target.value)}
+          />
+
+          <Input
+          label="CGPA (out of 10)"
+          name="cgpa"
+          type="number"
+          min="0"
+          max="10"
+          step="0.01"
+          value={profile.cgpa ?? ""}
+          onChange={(event) => onChange("cgpa", event.target.value)}
           />
 
         </div>
 
+        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+        {saved && <p role="status" className="text-sm text-green-700">{t("Education details saved successfully!")}</p>}
         {/* Submit Button */}
         <div className="flex justify-end border-t border-slate-100 pt-5">
-          <Button type="submit">
-            Save Education
+          <Button type="submit" loading={isSaving}>
+            {t("Save Education")}
           </Button>
         </div>
 

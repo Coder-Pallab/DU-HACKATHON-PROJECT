@@ -4,11 +4,10 @@ import {
   Users,
   MessageSquare,
   Clock,
-  ArrowRight,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const interviewCategories = [
   {
@@ -83,6 +82,7 @@ const interviewCategories = [
 ];
 
 function InterviewPrep() {
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState(1);
   const [expandedQuestion, setExpandedQuestion] = useState(null);
 
@@ -102,16 +102,16 @@ function InterviewPrep() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-800">
-            Interview Preparation
+            {t("Interview Preparation")}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            Practise common interview questions and improve your confidence.
+            {t("Practise common interview questions and improve your confidence.")}
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-teal-700">
           <Clock size={17} />
-          <span>Practice at your own pace</span>
+          <span>{t("Practice at your own pace")}</span>
         </div>
       </div>
 
@@ -143,11 +143,11 @@ function InterviewPrep() {
               />
 
               <h3 className="mt-3 text-sm font-semibold text-gray-800">
-                {category.title}
+                {t(category.title, category.title)}
               </h3>
 
               <p className="mt-1 text-xs leading-relaxed text-gray-500">
-                {category.description}
+                {t(category.description, category.description)}
               </p>
             </button>
           );
@@ -157,7 +157,7 @@ function InterviewPrep() {
       {/* Questions */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-gray-800">
-          {selectedCategory.title} Questions
+          {t(selectedCategory.title, selectedCategory.title)} {t("Questions")}
         </h3>
 
         {selectedCategory.questions.map((item, index) => {
@@ -174,66 +174,25 @@ function InterviewPrep() {
                 className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-gray-50"
               >
                 <span className="text-sm font-medium leading-relaxed text-gray-700">
-                  {index + 1}. {item.question}
+                  {index + 1}. {t(item.question, item.question)}
                 </span>
 
                 {isExpanded ? (
-                  <ChevronUp
-                    size={18}
-                    className="shrink-0 text-teal-700"
-                  />
+                  <ChevronUp size={18} className="shrink-0 text-gray-500" />
                 ) : (
-                  <ChevronDown
-                    size={18}
-                    className="shrink-0 text-gray-400"
-                  />
+                  <ChevronDown size={18} className="shrink-0 text-gray-500" />
                 )}
               </button>
 
               {isExpanded && (
-                <div className="border-t border-gray-100 bg-teal-50/50 p-4">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2
-                      size={18}
-                      className="mt-0.5 shrink-0 text-teal-700"
-                    />
-
-                    <div>
-                      <p className="text-xs font-semibold text-teal-800">
-                        Suggested Answer
-                      </p>
-
-                      <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                        {item.answer}
-                      </p>
-                    </div>
-                  </div>
+                <div className="border-t border-gray-100 bg-gray-50 p-4 text-sm leading-relaxed text-gray-600">
+                  <p className="font-medium text-teal-800">{t("Sample Answer:")}</p>
+                  <p className="mt-1">{t(item.answer, item.answer)}</p>
                 </div>
               )}
             </div>
           );
         })}
-      </div>
-
-      {/* Footer */}
-      <div className="flex flex-col gap-2 rounded-xl bg-teal-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-teal-900">
-            Keep practising!
-          </p>
-          <p className="mt-1 text-xs text-teal-700">
-            Review questions and prepare your own answers.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setExpandedQuestion(0)}
-          className="flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800"
-        >
-          Start Practice
-          <ArrowRight size={16} />
-        </button>
       </div>
     </div>
   );

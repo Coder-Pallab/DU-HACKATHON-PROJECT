@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   GraduationCap,
   Mail,
@@ -8,9 +8,15 @@ import {
   EyeOff,
   ArrowRight,
 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { getApiErrorMessage } from "../../services/apiClient";
 
 function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,6 +25,8 @@ function Login() {
   });
 
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(location.state?.message || "");
+  const initialSessionError = location.state?.sessionError;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,9 +37,10 @@ function Login() {
     }));
 
     setError("");
+    setNotice("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
@@ -39,10 +48,20 @@ function Login() {
       return;
     }
 
-    // Frontend demo only. Authentication will be implemented later.
-    console.log("Login form submitted:", formData);
-
-    alert("Login UI is working! Backend authentication is not connected yet.");
+    setIsSubmitting(true);
+    setError("");
+    try {
+      await login(
+        { email: formData.email.trim(), password: formData.password },
+        formData.rememberMe
+      );
+      const destination = location.state?.from?.pathname;
+      navigate(destination?.startsWith("/") ? destination : "/dashboard", { replace: true });
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -114,6 +133,17 @@ function Login() {
                 Welcome back! Please enter your details.
               </p>
             </div>
+
+            {initialSessionError && (
+              <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+                {initialSessionError}
+              </p>
+            )}
+            {notice && (
+              <p role="status" className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                {notice}
+              </p>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -226,10 +256,11 @@ function Login() {
               {/* Submit */}
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800"
+                disabled={isSubmitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 py-3.5 font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign In
-                <ArrowRight size={18} />
+                {isSubmitting ? "Signing in..." : "Sign In"}
+                {!isSubmitting && <ArrowRight size={18} />}
               </button>
 
             </form>

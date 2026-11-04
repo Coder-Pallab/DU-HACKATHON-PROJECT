@@ -5,6 +5,7 @@ import {
   ExternalLink,
   GraduationCap,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 function CourseCard({
   title = "Complete React.js Course",
@@ -17,6 +18,8 @@ function CourseCard({
   topics = ["React", "Hooks", "Components", "React Router"],
   courseUrl = "",
 }) {
+  const { t } = useLanguage();
+
   const levelStyles = {
     Beginner: "bg-green-50 text-green-700",
     Intermediate: "bg-yellow-50 text-yellow-700",
@@ -38,7 +41,7 @@ function CourseCard({
             levelStyles[level] || "bg-slate-100 text-slate-600"
           }`}
         >
-          {level}
+          {t(level, level)}
         </span>
 
       </div>
@@ -54,11 +57,11 @@ function CourseCard({
         </h3>
 
         <p className="mt-2 text-sm text-slate-500">
-          By {instructor}
+          {t("By")} {instructor}
         </p>
 
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          {description}
+          {t(description, description)}
         </p>
       </div>
 
@@ -67,7 +70,7 @@ function CourseCard({
 
         <div className="flex items-center gap-1.5">
           <Clock size={16} className="text-teal-600" />
-          {duration}
+          {t(duration, duration)}
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -80,7 +83,7 @@ function CourseCard({
       {/* Topics */}
       <div className="mb-5">
         <p className="mb-2 text-xs font-semibold text-slate-700">
-          What you'll learn
+          {t("What you'll learn")}
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -97,7 +100,6 @@ function CourseCard({
 
       {/* Footer */}
       <div className="mt-auto border-t border-slate-100 pt-4">
-
         <a
           href={courseUrl || undefined}
           target={courseUrl ? "_blank" : undefined}
@@ -113,7 +115,7 @@ function CourseCard({
           }`}
         >
           <BookOpen size={17} />
-          {courseUrl ? "Explore Course" : "Course Link Coming Soon"}
+          {courseUrl ? t("Explore Course") : t("Course Link Coming Soon")}
           {courseUrl && <ExternalLink size={15} />}
         </a>
 

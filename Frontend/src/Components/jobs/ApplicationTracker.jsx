@@ -4,6 +4,7 @@ import {
   Building2,
   ExternalLink,
 } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const statusStyles = {
   Applied: "bg-blue-50 text-blue-700",
@@ -13,6 +14,8 @@ const statusStyles = {
 };
 
 function ApplicationTracker({ applications = [], onView }) {
+  const { t } = useLanguage();
+
   return (
     <div className="w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -20,11 +23,11 @@ function ApplicationTracker({ applications = [], onView }) {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Application Tracker
+            {t("Application Tracker")}
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Keep track of your job applications.
+            {t("Keep track of your job applications.")}
           </p>
         </div>
 
@@ -41,11 +44,11 @@ function ApplicationTracker({ applications = [], onView }) {
           </div>
 
           <h3 className="font-medium text-gray-800">
-            No applications yet
+            {t("No applications yet")}
           </h3>
 
           <p className="mt-1 max-w-sm text-sm text-gray-500">
-            Your applied jobs will appear here so you can track their progress.
+            {t("Your applied jobs will appear here so you can track their progress.")}
           </p>
         </div>
       ) : (
@@ -82,14 +85,14 @@ function ApplicationTracker({ applications = [], onView }) {
                     "bg-gray-100 text-gray-600"
                   }`}
                 >
-                  {application.status}
+                  {t(application.status, application.status)}
                 </span>
               </div>
 
               {/* Footer */}
               <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
                 <span className="text-xs text-gray-400">
-                  Application #{application.id}
+                  {t("Application #")}{application.id}
                 </span>
 
                 <button
@@ -97,7 +100,7 @@ function ApplicationTracker({ applications = [], onView }) {
                   onClick={() => onView?.(application)}
                   className="flex items-center gap-1.5 text-sm font-medium text-teal-700 transition hover:text-teal-900"
                 >
-                  View Details
+                  {t("View Details")}
                   <ExternalLink size={15} />
                 </button>
               </div>
