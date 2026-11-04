@@ -478,7 +478,7 @@ export const seedDefaultCareers = async () => {
           slug,
         },
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
   }
 };

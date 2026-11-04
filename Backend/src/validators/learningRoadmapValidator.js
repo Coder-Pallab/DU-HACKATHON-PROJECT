@@ -32,3 +32,15 @@ export const validateRoadmapPhaseProgress = [
     .withMessage('Status must be not_started, in_progress, or completed'),
   validateRequest,
 ];
+
+export const validateRoadmapActivityProgress = [
+  param('roadmapId').isMongoId().withMessage('Invalid roadmap ID format'),
+  param('phaseId').isMongoId().withMessage('Invalid roadmap phase ID format'),
+  param('activityIndex')
+    .isInt({ min: 0, max: 4 })
+    .withMessage('Activity index must be an integer between 0 and 4'),
+  body('status')
+    .isIn(['not_started', 'in_progress', 'completed'])
+    .withMessage('Status must be not_started, in_progress, or completed'),
+  validateRequest,
+];

@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, LoaderCircle, RefreshCw } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle2,
+  Circle,
+  ExternalLink,
+  LoaderCircle,
+  RefreshCw,
+} from "lucide-react";
 import PageHeader from "../../Components/layout/PageHeader";
 import { careerService } from "../../services/careerService";
 import { aiService } from "../../services/aiService";
@@ -13,9 +20,9 @@ function LearningRoadmap() {
   const [careerId, setCareerId] = useState("");
   const [roadmap, setRoadmap] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingRoadmap, setIsLoadingRoadmap] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [busyPhase, setBusyPhase] = useState("");
+  const [busyActivity, setBusyActivity] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const currentContentLanguage = language === "as" ? "Assamese" : "English";
@@ -59,33 +66,17 @@ function LearningRoadmap() {
     };
   }, []);
 
-  const loadRoadmap = async () => {
+  const loadRoadmap = () => {
     if (!careerId) return;
     setError("");
     setNotice("");
-    setIsLoadingRoadmap(true);
-    try {
-      const loadedRoadmap = await aiService.getRoadmap(careerId);
-      setRoadmap(loadedRoadmap);
-      setSavedRoadmaps((current) => {
-        const matchingCareer = careers.find((career) => career._id === careerId);
-        if (!matchingCareer) return current;
-        const existingIndex = current.findIndex((item) => item.career._id === careerId);
-        if (existingIndex < 0) return [...current, { career: matchingCareer, roadmap: loadedRoadmap }];
-        return current.map((item, index) =>
-          index === existingIndex ? { ...item, roadmap: loadedRoadmap } : item
-        );
-      });
-    } catch (requestError) {
+    const savedRoadmap = savedRoadmaps.find((item) => item.career._id === careerId);
+    if (!savedRoadmap) {
       setRoadmap(null);
-      if (requestError.response?.status === 404) {
-        setNotice(t("No saved roadmap exists for this career yet. Generate one to get started."));
-      } else {
-        setError(getApiErrorMessage(requestError));
-      }
-    } finally {
-      setIsLoadingRoadmap(false);
+      setNotice(t("No saved roadmap exists for this career yet. Generate one to get started."));
+      return;
     }
+    setRoadmap(savedRoadmap.roadmap);
   };
 
   const generateRoadmap = async () => {
@@ -134,6 +125,32 @@ function LearningRoadmap() {
     }
   };
 
+  const updateActivity = async (phase, activityIndex, status) => {
+    if (!roadmap?._id) return;
+    const activityKey = `${phase._id}:${activityIndex}`;
+    setBusyActivity(activityKey);
+    setError("");
+    setNotice("");
+    try {
+      const updated = await aiService.updateRoadmapActivity(
+        roadmap._id,
+        phase._id,
+        activityIndex,
+        status
+      );
+      setRoadmap(updated);
+      setSavedRoadmaps((current) =>
+        current.map((item) =>
+          item.roadmap._id === updated._id ? { ...item, roadmap: updated } : item
+        )
+      );
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setBusyActivity("");
+    }
+  };
+
   const selectedCareer = careers.find((career) => career._id === careerId);
 
   return (
@@ -158,18 +175,18 @@ function LearningRoadmap() {
               setNotice("");
               setError("");
             }}
-            disabled={isLoading || isLoadingRoadmap || isGenerating}
+            disabled={isLoading || isGenerating}
             className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700"
             aria-label="Career goal for roadmap"
           >
             <option value="">{t("Select a career")}</option>
             {careers.map((career) => <option key={career._id} value={career._id}>{career.title} · {career.sector}</option>)}
           </select>
-          <button type="button" disabled={!careerId || isLoading || isLoadingRoadmap || isGenerating} onClick={loadRoadmap} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-50">
-            {isLoadingRoadmap ? <LoaderCircle size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-            {isLoadingRoadmap ? t("Loading...") : t("Load saved roadmap")}
+          <button type="button" disabled={!careerId || isLoading || isGenerating} onClick={loadRoadmap} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 disabled:opacity-50">
+            <RefreshCw size={16} />
+            {t("Load saved roadmap")}
           </button>
-          <button type="button" disabled={!careerId || isGenerating || isLoadingRoadmap} onClick={generateRoadmap} className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50">
+          <button type="button" disabled={!careerId || isGenerating} onClick={generateRoadmap} className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50">
             {isGenerating ? <LoaderCircle size={16} className="animate-spin" /> : <BookOpen size={16} />}
             {isGenerating ? t("Generating...") : t("Generate roadmap")}
           </button>
@@ -197,7 +214,7 @@ function LearningRoadmap() {
               <button
                 key={savedRoadmap._id}
                 type="button"
-                disabled={isLoadingRoadmap || isGenerating || Boolean(busyPhase)}
+                disabled={isGenerating || Boolean(busyPhase) || Boolean(busyActivity)}
                 onClick={() => {
                   setCareerId(career._id);
                   setRoadmap(savedRoadmap);
@@ -234,7 +251,7 @@ function LearningRoadmap() {
               </p>
               <button
                 type="button"
-                disabled={isGenerating || isLoadingRoadmap || Boolean(busyPhase)}
+                disabled={isGenerating || Boolean(busyPhase) || Boolean(busyActivity)}
                 onClick={generateRoadmap}
                 className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-amber-800 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
@@ -248,7 +265,7 @@ function LearningRoadmap() {
               <div>
                 <p className="text-sm font-medium text-teal-700">{roadmap.careerTitle || selectedCareer?.title}</p>
                 <h2 className="mt-1 text-xl font-bold text-slate-800">{t("Personalized learning plan")}</h2>
-                {roadmap.careerDescription && roadmap.contentLanguage === currentContentLanguage && language === "en" && (
+                {roadmap.careerDescription && roadmap.contentLanguage === currentContentLanguage && (
                   <p className="mt-2 text-sm leading-6 text-slate-600">{roadmap.careerDescription}</p>
                 )}
                 <p className="mt-2 text-sm leading-6 text-slate-600">{roadmap.summary}</p>
@@ -278,7 +295,7 @@ function LearningRoadmap() {
                 <select
                   aria-label={`Progress for ${phase.title}`}
                   value={phase.status}
-                  disabled={busyPhase === phase._id}
+                  disabled={busyPhase === phase._id || Boolean(busyActivity)}
                   onChange={(event) => updatePhase(phase, event.target.value)}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm capitalize"
                 >
@@ -290,14 +307,68 @@ function LearningRoadmap() {
               <div className="mt-5">
                 <h4 className="text-sm font-semibold text-slate-700">{t("Activities")}</h4>
                 <ul className="mt-2 space-y-2">
-                  {(phase.activities || []).map((activity, index) => (
-                    <li key={`${phase._id}-activity-${index}`} className="flex items-start gap-2 text-sm text-slate-600">
-                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-teal-600" />
-                      {activity}
-                    </li>
-                  ))}
+                  {(phase.activities || []).map((activity, index) => {
+                    const activityStatus =
+                      phase.activityProgress?.find((item) => item.activityIndex === index)?.status ||
+                      (phase.status === "completed" ? "completed" : "not_started");
+                    const activityKey = `${phase._id}:${index}`;
+                    return (
+                      <li
+                        key={activityKey}
+                        className="flex flex-col gap-2 rounded-lg border border-slate-100 p-3 sm:flex-row sm:items-center"
+                      >
+                        <div className="flex min-w-0 flex-1 items-start gap-2 text-sm leading-6 text-slate-600">
+                          {activityStatus === "completed" ? (
+                            <CheckCircle2 size={16} className="mt-1 shrink-0 text-teal-600" />
+                          ) : (
+                            <Circle size={16} className="mt-1 shrink-0 text-slate-400" />
+                          )}
+                          <span>{activity}</span>
+                        </div>
+                        <select
+                          aria-label={`${t("Progress for")} ${activity}`}
+                          value={activityStatus}
+                          disabled={Boolean(busyActivity) || Boolean(busyPhase)}
+                          onChange={(event) => updateActivity(phase, index, event.target.value)}
+                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 disabled:opacity-50"
+                        >
+                          <option value="not_started">{t("Not started")}</option>
+                          <option value="in_progress">{t("In progress")}</option>
+                          <option value="completed">{t("Completed")}</option>
+                        </select>
+                        {busyActivity === activityKey && (
+                          <LoaderCircle size={15} className="animate-spin text-teal-700" />
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
+              {phase.resources?.length > 0 && (
+                <div className="mt-5 border-t border-slate-100 pt-4">
+                  <h4 className="text-sm font-semibold text-slate-700">{t("Recommended learning resources")}</h4>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {phase.resources.map((resource) => (
+                      <a
+                        key={resource.key}
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-xl border border-slate-200 p-4 transition hover:border-teal-300 hover:bg-teal-50/40"
+                      >
+                        <span className="flex items-start justify-between gap-3">
+                          <span className="font-semibold text-slate-800">{resource.title}</span>
+                          <ExternalLink size={15} className="mt-1 shrink-0 text-teal-700" />
+                        </span>
+                        <span className="mt-1 block text-xs text-teal-700">{resource.provider}</span>
+                        <span className="mt-2 block text-sm leading-6 text-slate-600">
+                          {resource.description}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
               {busyPhase === phase._id && <p className="mt-3 text-xs text-slate-500">{t("Saving progress...")}</p>}
             </article>
           ))}

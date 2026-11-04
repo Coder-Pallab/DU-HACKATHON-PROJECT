@@ -52,6 +52,41 @@ export const aiService = {
     );
   },
 
+  async updateRoadmapActivity(roadmapId, phaseId, activityIndex, status) {
+    return getData(
+      await apiClient.patch(
+        `/ai/roadmaps/${encodeURIComponent(roadmapId)}/phases/${encodeURIComponent(phaseId)}/activities/${activityIndex}`,
+        { status }
+      )
+    );
+  },
+
+  async listMockInterviews() {
+    return getData(await apiClient.get("/ai/interviews"));
+  },
+
+  async createMockInterview(careerId) {
+    return getData(
+      await apiClient.post("/ai/interviews", { careerId }, { timeout: 40_000 })
+    );
+  },
+
+  async submitMockInterviewAnswer(interviewId, questionId, answer) {
+    return getData(
+      await apiClient.patch(
+        `/ai/interviews/${encodeURIComponent(interviewId)}/questions/${encodeURIComponent(questionId)}`,
+        { answer },
+        { timeout: 40_000 }
+      )
+    );
+  },
+
+  async deleteMockInterview(interviewId) {
+    return getData(
+      await apiClient.delete(`/ai/interviews/${encodeURIComponent(interviewId)}`)
+    );
+  },
+
   async listConversations(params = {}) {
     const { data } = await apiClient.get("/ai/chat/conversations", { params });
     return data.data.items;

@@ -4,7 +4,10 @@ import express from 'express';
 import app from '../src/app.js';
 import CareerCounsellingConversation from '../src/models/CareerCounsellingConversation.js';
 import { LANGUAGES } from '../src/constants/languages.js';
-import { readGeneratedText } from '../src/services/geminiService.js';
+import {
+  getCounsellorModelCandidates,
+  readGeneratedText,
+} from '../src/services/geminiService.js';
 import {
   buildCounsellorPrompt,
   buildCounsellorSystemInstruction,
@@ -61,6 +64,17 @@ test('counsellor prompt explicitly requests the selected response language', () 
       history: [{ role: 'user', content: 'x'.repeat(2000) }],
     }).length < 2000,
     'prompt bounds prior message size'
+  );
+});
+
+test('counsellor model candidates include distinct configured and stable fallback models', () => {
+  assert.deepEqual(
+    getCounsellorModelCandidates('gemini-3.6-flash', 'gemini-3.8-flash'),
+    ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
+  );
+  assert.deepEqual(
+    getCounsellorModelCandidates('gemini-3.5-flash-lite', 'gemini-3.5-flash-lite'),
+    ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']
   );
 });
 

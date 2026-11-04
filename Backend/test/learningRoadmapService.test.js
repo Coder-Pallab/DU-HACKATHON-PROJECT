@@ -6,10 +6,15 @@ import LearningRoadmap from '../src/models/LearningRoadmap.js';
 import {
   buildRoadmapPhases,
   buildRoadmapPrompt,
+  calculateRoadmapProgress,
   createRoadmapSummary,
+  getCuratedResources,
   preserveRoadmapProgress,
 } from '../src/services/learningRoadmapService.js';
-import { validateRoadmapPhaseProgress } from '../src/validators/learningRoadmapValidator.js';
+import {
+  validateRoadmapActivityProgress,
+  validateRoadmapPhaseProgress,
+} from '../src/validators/learningRoadmapValidator.js';
 
 let server;
 let baseUrl;
@@ -130,6 +135,34 @@ test('supplies the selected language instruction to the roadmap AI prompt', () =
   assert.match(prompt, /Generate all explanatory content in natural, fluent Assamese \(অসমীয়া\)/);
   assert.match(prompt, /"focusSkill": "exact supplied focus skill"/);
   assert.match(prompt, /"activities": \["string"\]/);
+  assert.match(prompt, /resourceOptions/);
+});
+
+test('returns only curated learning resources and localizes their descriptions', () => {
+  const resources = getCuratedResources('React', 'Assamese');
+  assert.equal(resources.length, 1);
+  assert.equal(resources[0].url, 'https://react.dev/learn');
+  assert.match(resources[0].description, /[\u0980-\u09FF]/u);
+  assert.deepEqual(getCuratedResources('Unlisted skill', 'English'), []);
+});
+
+test('computes roadmap progress from completed activities', () => {
+  assert.equal(
+    calculateRoadmapProgress([
+      {
+        activities: ['A', 'B'],
+        activityProgress: [
+          { activityIndex: 0, activity: 'A', status: 'completed' },
+          { activityIndex: 1, activity: 'B', status: 'in_progress' },
+        ],
+      },
+      {
+        activities: ['C'],
+        activityProgress: [{ activityIndex: 0, activity: 'C', status: 'not_started' }],
+      },
+    ]),
+    33
+  );
 });
 
 test('preserves matching phase completion when regenerating a roadmap', () => {
@@ -200,12 +233,30 @@ test('roadmap model accepts language metadata while leaving legacy metadata opti
         weekEnd: 2,
         objective: 'Reactৰ ব্যৱহাৰিক দক্ষতা বিকাশ কৰক।',
         activities: ['এটা reusable component নিৰ্মাণ কৰক।'],
+        activityProgress: [
+          {
+            activityIndex: 0,
+            activity: 'এটা reusable component নিৰ্মাণ কৰক।',
+            status: 'in_progress',
+          },
+        ],
+        resources: [
+          {
+            key: 'react-learn',
+            title: 'Learn React',
+            provider: 'React',
+            url: 'https://react.dev/learn',
+            description: 'Component নিৰ্মাণ কৰিবলৈ React ৰ official tutorial অনুসৰণ কৰক।',
+          },
+        ],
       },
     ],
   });
 
   await roadmap.validate();
   assert.equal(roadmap.contentLanguage, 'Assamese');
+  assert.equal(roadmap.phases[0].activityProgress[0].status, 'in_progress');
+  assert.equal(roadmap.phases[0].resources[0].key, 'react-learn');
 });
 
 test('roadmap endpoints require authentication', async () => {
@@ -264,5 +315,39 @@ test('roadmap phase progress accepts only valid phase states', async () => {
     await new Promise((resolve, reject) => {
       validationServer.close((error) => (error ? reject(error) : resolve()));
     });
+  }
+});
+
+test('roadmap activity progress accepts valid status and bounded activity index', async () => {
+  const validationApp = express();
+  validationApp.use(express.json());
+  validationApp.patch(
+    '/roadmaps/:roadmapId/phases/:phaseId/activities/:activityIndex',
+    validateRoadmapActivityProgress,
+    (req, res) => res.sendStatus(204)
+  );
+  const server = validationApp.listen(0);
+  await new Promise((resolve, reject) => {
+    server.once('listening', resolve);
+    server.once('error', reject);
+  });
+  const url = `http://127.0.0.1:${server.address().port}/roadmaps/507f1f77bcf86cd799439011/phases/507f1f77bcf86cd799439012/activities/0`;
+  try {
+    const validResponse = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' }),
+    });
+    const invalidResponse = await fetch(url.replace('/activities/0', '/activities/5'), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' }),
+    });
+    assert.equal(validResponse.status, 204);
+    assert.equal(invalidResponse.status, 422);
+  } finally {
+    await new Promise((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve()))
+    );
   }
 });

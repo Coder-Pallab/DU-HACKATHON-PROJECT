@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Paperclip } from "lucide-react";
+import { LoaderCircle, Send, Paperclip } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 
 function ChatInput({ onSend, disabled = false }) {
@@ -53,10 +53,15 @@ function ChatInput({ onSend, disabled = false }) {
       <button
         type="submit"
         disabled={!message.trim() || disabled || isSending}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label={t("Send message")}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label={isSending ? t("Sending message") : t("Send message")}
+        aria-busy={isSending}
       >
-        <Send size={18} />
+        {isSending ? (
+          <LoaderCircle size={18} className="animate-spin" />
+        ) : (
+          <Send size={18} />
+        )}
       </button>
     </form>
   );

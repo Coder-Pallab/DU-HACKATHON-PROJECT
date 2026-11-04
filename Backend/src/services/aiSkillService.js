@@ -58,7 +58,7 @@ export const classifySkills = async (skills) => {
             demandLevel: item.demandLevel || 'High',
           },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     } catch (dbErr) {
       // Ignore duplicate key collision during concurrent upserts

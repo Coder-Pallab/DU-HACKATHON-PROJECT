@@ -163,3 +163,26 @@ export const validateUpdatePreferences = [
   validateRequest,
 ];
 
+export const validatePlacementReadinessRequest = [
+  body('careerId')
+    .trim()
+    .notEmpty()
+    .withMessage('Career ID or slug is required')
+    .custom((value) =>
+      /^[0-9a-fA-F]{24}$/.test(value) || /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(value)
+    )
+    .withMessage('Career identifier must be a valid MongoDB ObjectId or URL slug'),
+  validateRequest,
+];
+
+export const validatePlacementReadinessCareerId = [
+  param('careerId')
+    .trim()
+    .notEmpty()
+    .withMessage('Career ID or slug is required')
+    .custom((value) =>
+      /^[0-9a-fA-F]{24}$/.test(value) || /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(value)
+    )
+    .withMessage('Career identifier must be a valid MongoDB ObjectId or URL slug'),
+  validateRequest,
+];

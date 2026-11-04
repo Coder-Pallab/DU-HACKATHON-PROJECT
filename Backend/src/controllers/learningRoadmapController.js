@@ -38,3 +38,14 @@ export const updateRoadmapPhase = asyncHandler(async (req, res) => {
   );
   return ApiResponse.success(res, roadmap, 'Roadmap phase progress updated successfully');
 });
+
+export const updateRoadmapActivity = asyncHandler(async (req, res) => {
+  const roadmap = await learningRoadmapService.updateRoadmapActivity(
+    req.user._id,
+    req.params.roadmapId,
+    req.params.phaseId,
+    Number(req.params.activityIndex),
+    req.body.status
+  );
+  return ApiResponse.success(res, roadmap, 'Roadmap activity progress updated successfully');
+});

@@ -1,200 +1,319 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Code,
-  Users,
-  MessageSquare,
-  Clock,
-  ChevronDown,
-  ChevronUp,
+  CheckCircle2,
+  CircleHelp,
+  LoaderCircle,
+  MessageSquareText,
+  Play,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
+import { aiService } from "../../services/aiService";
+import { getApiErrorMessage } from "../../services/apiClient";
 
-const interviewCategories = [
-  {
-    id: 1,
-    title: "Technical Interview",
-    description: "Prepare for programming, DSA and technical concepts.",
-    icon: Code,
-    questions: [
-      {
-        question: "What is the difference between let, const and var in JavaScript?",
-        answer:
-          "var is function-scoped, while let and const are block-scoped. const cannot be reassigned after declaration.",
-      },
-      {
-        question: "What is Object-Oriented Programming?",
-        answer:
-          "OOP is a programming approach based on objects and classes. Its four main principles are encapsulation, inheritance, polymorphism and abstraction.",
-      },
-      {
-        question: "What is the difference between SQL and NoSQL?",
-        answer:
-          "SQL databases generally use structured tables and relational schemas. NoSQL databases support flexible data models such as documents, key-value pairs and graphs.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "HR Interview",
-    description: "Improve your confidence and communication skills.",
-    icon: Users,
-    questions: [
-      {
-        question: "Tell me about yourself.",
-        answer:
-          "Introduce your educational background, technical skills, projects and career goals in a clear and structured way.",
-      },
-      {
-        question: "What are your strengths and weaknesses?",
-        answer:
-          "Mention genuine strengths with examples. For weaknesses, explain what you are actively doing to improve.",
-      },
-      {
-        question: "Why should we hire you?",
-        answer:
-          "Connect your skills, willingness to learn and relevant project experience with the requirements of the role.",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Communication Skills",
-    description: "Practise professional communication and presentation.",
-    icon: MessageSquare,
-    questions: [
-      {
-        question: "How do you explain a technical project to a non-technical person?",
-        answer:
-          "Focus on the problem, your solution and its benefits. Avoid unnecessary technical terminology.",
-      },
-      {
-        question: "How do you handle disagreements in a team?",
-        answer:
-          "Listen carefully, understand different perspectives and work towards a solution that supports the team's goal.",
-      },
-      {
-        question: "How do you handle pressure?",
-        answer:
-          "Prioritise tasks, break complex work into smaller steps and communicate early when you need support.",
-      },
-    ],
-  },
-];
+const careerIdFor = (interview) =>
+  typeof interview.career === "object" ? interview.career?._id : interview.career;
 
-function InterviewPrep() {
+function InterviewPrep({ careerId, careerTitle }) {
   const { t } = useLanguage();
-  const [activeCategory, setActiveCategory] = useState(1);
-  const [expandedQuestion, setExpandedQuestion] = useState(null);
+  const [interviews, setInterviews] = useState([]);
+  const [activeInterviewId, setActiveInterviewId] = useState("");
+  const [loadedCareerId, setLoadedCareerId] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [isStarting, setIsStarting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const selectedCategory = interviewCategories.find(
-    (category) => category.id === activeCategory
+  useEffect(() => {
+    if (!careerId) return undefined;
+
+    let active = true;
+    aiService
+      .listMockInterviews()
+      .then((result) => {
+        if (!active) return;
+        const matchingInterviews = (result || []).filter(
+          (interview) => careerIdFor(interview) === careerId
+        );
+        setInterviews(matchingInterviews);
+        setActiveInterviewId(matchingInterviews[0]?._id || "");
+        setLoadedCareerId(careerId);
+        setError("");
+      })
+      .catch((requestError) => {
+        if (active) {
+          setLoadedCareerId(careerId);
+          setError(getApiErrorMessage(requestError));
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [careerId]);
+
+  const activeInterview =
+    interviews.find((interview) => interview._id === activeInterviewId) || null;
+  const isLoading = Boolean(careerId) && loadedCareerId !== careerId;
+  const unansweredQuestions = useMemo(
+    () => (activeInterview?.questions || []).filter((question) => !question.answer),
+    [activeInterview]
   );
+  const currentQuestion = unansweredQuestions[0];
+  const answeredCount = (activeInterview?.questions || []).length - unansweredQuestions.length;
 
-  const toggleQuestion = (index) => {
-    setExpandedQuestion(
-      expandedQuestion === index ? null : index
+  const updateInterview = (updated) => {
+    setInterviews((current) =>
+      current.map((interview) => (interview._id === updated._id ? updated : interview))
     );
+    setActiveInterviewId(updated._id);
+    setAnswer("");
+  };
+
+  const startInterview = async () => {
+    if (!careerId) return;
+    setIsStarting(true);
+    setError("");
+    try {
+      const created = await aiService.createMockInterview(careerId);
+      setInterviews((current) => [created, ...current]);
+      setActiveInterviewId(created._id);
+      setAnswer("");
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const submitAnswer = async (event) => {
+    event.preventDefault();
+    if (!activeInterview || !currentQuestion || answer.trim().length < 5) return;
+    setIsSubmitting(true);
+    setError("");
+    try {
+      const updated = await aiService.submitMockInterviewAnswer(
+        activeInterview._id,
+        currentQuestion._id || currentQuestion.id,
+        answer.trim()
+      );
+      updateInterview(updated);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteInterview = async (interview) => {
+    if (!window.confirm(t("Delete this saved mock interview?"))) return;
+    setError("");
+    try {
+      await aiService.deleteMockInterview(interview._id);
+      const remaining = interviews.filter((item) => item._id !== interview._id);
+      setInterviews(remaining);
+      if (activeInterview?._id === interview._id) {
+        setActiveInterviewId(remaining[0]?._id || "");
+      }
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    }
   };
 
   return (
-    <div className="w-full space-y-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-      {/* Header */}
+    <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            {t("Interview Preparation")}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            {t("Practise common interview questions and improve your confidence.")}
-          </p>
+        <div className="flex items-start gap-3">
+          <div className="rounded-xl bg-teal-50 p-3 text-teal-700">
+            <MessageSquareText size={22} />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-slate-800">{t("AI Mock Interview")}</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              {careerTitle
+                ? `${t("Practice role-specific questions for")} ${careerTitle}.`
+                : t("Choose a career goal above to start an interview.")}
+            </p>
+          </div>
         </div>
-
-        <div className="flex items-center gap-2 text-sm text-teal-700">
-          <Clock size={17} />
-          <span>{t("Practice at your own pace")}</span>
-        </div>
+        <button
+          type="button"
+          onClick={startInterview}
+          disabled={!careerId || isStarting || isLoading}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isStarting ? (
+            <LoaderCircle size={16} className="animate-spin" />
+          ) : (
+            <Plus size={16} />
+          )}
+          {isStarting ? t("Generating questions...") : t("Start a mock interview")}
+        </button>
       </div>
 
-      {/* Category Selection */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {interviewCategories.map((category) => {
-          const Icon = category.icon;
-          const isActive = activeCategory === category.id;
+      {error && (
+        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
 
-          return (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => {
-                setActiveCategory(category.id);
-                setExpandedQuestion(null);
-              }}
-              className={`rounded-xl border p-4 text-left transition ${
-                isActive
-                  ? "border-teal-500 bg-teal-50"
-                  : "border-gray-200 bg-white hover:border-teal-300"
-              }`}
-            >
-              <Icon
-                size={22}
-                className={
-                  isActive ? "text-teal-700" : "text-gray-500"
-                }
-              />
+      {isLoading ? (
+        <p role="status" className="flex items-center gap-2 text-sm text-slate-500">
+          <LoaderCircle size={16} className="animate-spin" />
+          {t("Loading saved interviews...")}
+        </p>
+      ) : (
+        <>
+          {interviews.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {interviews.map((interview) => (
+                <button
+                  key={interview._id}
+                  type="button"
+                  onClick={() => {
+                    setActiveInterviewId(interview._id);
+                    setAnswer("");
+                  }}
+                  className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
+                    activeInterview?._id === interview._id
+                      ? "border-teal-500 bg-teal-50 text-teal-800"
+                      : "border-slate-200 text-slate-600 hover:border-teal-300"
+                  }`}
+                >
+                  {new Date(interview.createdAt).toLocaleDateString()} ·{" "}
+                  {interview.status === "completed" ? t("Completed") : t("In progress")}
+                </button>
+              ))}
+            </div>
+          )}
 
-              <h3 className="mt-3 text-sm font-semibold text-gray-800">
-                {t(category.title, category.title)}
-              </h3>
-
-              <p className="mt-1 text-xs leading-relaxed text-gray-500">
-                {t(category.description, category.description)}
+          {!activeInterview ? (
+            <div className="rounded-xl border border-dashed border-slate-300 p-5 text-center">
+              <CircleHelp size={24} className="mx-auto text-slate-400" />
+              <p className="mt-2 text-sm text-slate-600">
+                {careerId
+                  ? t("No interview sessions saved for this career.")
+                  : t("Choose a career goal above to view mock interviews.")}
               </p>
-            </button>
-          );
-        })}
-      </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
+                <div>
+                  <p className="font-semibold text-slate-800">{activeInterview.careerTitle}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {t(activeInterview.contentLanguage)} · {answeredCount}{" "}
+                    {t("of")} {activeInterview.questions.length} {t("answers evaluated")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {activeInterview.status === "completed" && (
+                    <span className="rounded-full bg-teal-100 px-3 py-1 text-sm font-semibold text-teal-800">
+                      {t("Overall score")}: {activeInterview.overallScore}%
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => deleteInterview(activeInterview)}
+                    aria-label={t("Delete this saved mock interview?")}
+                    className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-700"
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              </div>
 
-      {/* Questions */}
-      <div className="space-y-3">
-        <h3 className="text-base font-semibold text-gray-800">
-          {t(selectedCategory.title, selectedCategory.title)} {t("Questions")}
-        </h3>
-
-        {selectedCategory.questions.map((item, index) => {
-          const isExpanded = expandedQuestion === index;
-
-          return (
-            <div
-              key={index}
-              className="overflow-hidden rounded-xl border border-gray-200"
-            >
-              <button
-                type="button"
-                onClick={() => toggleQuestion(index)}
-                className="flex w-full items-center justify-between gap-3 p-4 text-left hover:bg-gray-50"
-              >
-                <span className="text-sm font-medium leading-relaxed text-gray-700">
-                  {index + 1}. {t(item.question, item.question)}
-                </span>
-
-                {isExpanded ? (
-                  <ChevronUp size={18} className="shrink-0 text-gray-500" />
-                ) : (
-                  <ChevronDown size={18} className="shrink-0 text-gray-500" />
-                )}
-              </button>
-
-              {isExpanded && (
-                <div className="border-t border-gray-100 bg-gray-50 p-4 text-sm leading-relaxed text-gray-600">
-                  <p className="font-medium text-teal-800">{t("Sample Answer:")}</p>
-                  <p className="mt-1">{t(item.answer, item.answer)}</p>
+              {currentQuestion ? (
+                <form onSubmit={submitAnswer} className="rounded-xl border border-slate-200 p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-800">
+                      {answeredCount + 1}
+                    </span>
+                    <h3 className="pt-1 font-semibold leading-6 text-slate-800">
+                      {currentQuestion.prompt}
+                    </h3>
+                  </div>
+                  <label className="mt-4 block text-sm font-medium text-slate-700">
+                    {t("Your answer")}
+                    <textarea
+                      value={answer}
+                      onChange={(event) => setAnswer(event.target.value)}
+                      rows={5}
+                      maxLength={6000}
+                      required
+                      minLength={5}
+                      disabled={isSubmitting}
+                      placeholder={t("Write your answer in the interview language...")}
+                      className="mt-2 block w-full resize-y rounded-xl border border-slate-200 px-3 py-3 text-sm leading-6 text-slate-800 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    />
+                  </label>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-xs text-slate-400">
+                      {answer.length}/6000
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || answer.trim().length < 5}
+                      className="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <LoaderCircle size={16} className="animate-spin" />
+                      ) : (
+                        <Play size={16} />
+                      )}
+                      {isSubmitting ? t("Evaluating answer...") : t("Submit for feedback")}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 size={18} />
+                    {t("Interview completed")}
+                  </div>
+                  <p className="mt-1">
+                    {t("Your overall score is")} {activeInterview.overallScore}%.
+                  </p>
                 </div>
               )}
+
+              {(activeInterview.questions || [])
+                .filter((question) => question.answer)
+                .map((question, index) => (
+                  <article
+                    key={question._id || index}
+                    className="rounded-xl border border-slate-200 p-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <h4 className="font-medium leading-6 text-slate-800">
+                        {question.prompt}
+                      </h4>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {t("Score")}: {question.score}%
+                      </span>
+                    </div>
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                      {question.answer}
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-slate-700">{question.feedback}</p>
+                    {question.strengths?.length > 0 && (
+                      <p className="mt-2 text-sm leading-6 text-teal-800">
+                        <strong>{t("Strengths")}:</strong> {question.strengths.join(" · ")}
+                      </p>
+                    )}
+                    {question.improvements?.length > 0 && (
+                      <p className="mt-2 text-sm leading-6 text-amber-800">
+                        <strong>{t("Suggestions")}:</strong> {question.improvements.join(" · ")}
+                      </p>
+                    )}
+                  </article>
+                ))}
             </div>
-          );
-        })}
-      </div>
-    </div>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 

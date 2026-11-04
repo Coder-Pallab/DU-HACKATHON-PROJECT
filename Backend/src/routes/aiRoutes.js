@@ -15,6 +15,7 @@ import {
   validateRoadmapCareerId,
   validateRoadmapGeneration,
   validateRoadmapPhaseProgress,
+  validateRoadmapActivityProgress,
 } from '../validators/learningRoadmapValidator.js';
 import * as careerCounsellorController from '../controllers/careerCounsellorController.js';
 import {
@@ -22,6 +23,12 @@ import {
   validateConversationPagination,
   validateCounsellingMessage,
 } from '../validators/careerCounsellorValidator.js';
+import * as mockInterviewController from '../controllers/mockInterviewController.js';
+import {
+  validateMockInterviewAnswer,
+  validateMockInterviewGeneration,
+  validateMockInterviewId,
+} from '../validators/mockInterviewValidator.js';
 
 const router = Router();
 
@@ -75,6 +82,11 @@ router.patch(
   validateRoadmapPhaseProgress,
   learningRoadmapController.updateRoadmapPhase
 );
+router.patch(
+  '/roadmaps/:roadmapId/phases/:phaseId/activities/:activityIndex',
+  validateRoadmapActivityProgress,
+  learningRoadmapController.updateRoadmapActivity
+);
 
 /**
  * Bilingual career counselling conversations
@@ -94,6 +106,33 @@ router.get(
   '/chat/conversations/:conversationId',
   validateConversationId,
   careerCounsellorController.getConversation
+);
+
+/**
+ * AI mock interviews
+ */
+router.post(
+  '/interviews',
+  aiLimiter,
+  validateMockInterviewGeneration,
+  mockInterviewController.createMockInterview
+);
+router.get('/interviews', mockInterviewController.listMockInterviews);
+router.get(
+  '/interviews/:interviewId',
+  validateMockInterviewId,
+  mockInterviewController.getMockInterview
+);
+router.patch(
+  '/interviews/:interviewId/questions/:questionId',
+  aiLimiter,
+  validateMockInterviewAnswer,
+  mockInterviewController.submitMockInterviewAnswer
+);
+router.delete(
+  '/interviews/:interviewId',
+  validateMockInterviewId,
+  mockInterviewController.deleteMockInterview
 );
 
 // Alias to retrieve current skills

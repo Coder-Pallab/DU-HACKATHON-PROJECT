@@ -7,7 +7,9 @@ import MyProfile from "../pages/dashboard/MyProfile";
 import DashboardSection from "../pages/dashboard/DashboardSection";
 import CareerMatches from "../pages/dashboard/CareerMatches";
 import ResumeSkills from "../pages/dashboard/ResumeSkills";
+import ResumeIntelligence from "../pages/dashboard/ResumeIntelligence";
 import LearningRoadmap from "../pages/dashboard/LearningRoadmap";
+import PlacementReadiness from "../pages/dashboard/Placementreadiness";
 import AICounsellor from "../pages/dashboard/AICounsellor";
 import Settings from "../pages/dashboard/Settings";
 import HelpSupport from "../pages/dashboard/HelpSupport";
@@ -44,10 +46,11 @@ function AppRoutes() {
                 <Route index element={<Dashboard />} />
                 <Route path="profile" element={<MyProfile />} />
                 <Route path="resume" element={<ResumeSkills />} />
+                <Route path="resume-intelligence" element={<ResumeIntelligence />} />
                 <Route path="careers" element={<CareerMatches />} />
                 <Route path="roadmap" element={<LearningRoadmap />} />
                 <Route path="counsellor" element={<AICounsellor />} />
-                <Route path="placement" element={<FeatureUnavailable title="Placement Readiness" />} />
+                <Route path="placement" element={<PlacementReadiness />} />
                 <Route path="jobs" element={<FeatureUnavailable title="Jobs & Internships" />} />
                 <Route path="jobs-internships" element={<FeatureUnavailable title="Jobs & Internships" />} />
                 <Route path="saved" element={<FeatureUnavailable title="Saved Items" />} />

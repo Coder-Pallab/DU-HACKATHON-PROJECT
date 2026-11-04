@@ -1,5 +1,6 @@
 import path from 'path';
 import Resume from '../models/Resume.js';
+import ResumeAnalysis from '../models/ResumeAnalysis.js';
 import Student from '../models/Student.js';
 import { ApiError } from '../utils/apiError.js';
 import { ROLES } from '../constants/roles.js';
@@ -235,7 +236,7 @@ export const deleteResume = async (resumeId, requestingUser) => {
   // Remove stored file from storage (Cloudinary or local disk)
   await removeStoredFile(resume);
 
-  // Delete DB record
+  await ResumeAnalysis.deleteMany({ resume: resumeId });
   await Resume.findByIdAndDelete(resumeId);
 
   return true;

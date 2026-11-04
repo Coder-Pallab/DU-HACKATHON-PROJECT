@@ -2,6 +2,7 @@ import { asyncHandler } from '../middleware/asyncHandler.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { HTTP_STATUS } from '../constants/httpStatusCodes.js';
 import * as studentService from '../services/studentService.js';
+import * as placementReadinessService from '../services/placementReadinessService.js';
 
 /**
  * Get profile of logged-in student
@@ -66,3 +67,29 @@ export const updatePreferences = asyncHandler(async (req, res) => {
   return ApiResponse.success(res, profile, 'Preferences updated successfully');
 });
 
+export const createPlacementReadinessAssessment = asyncHandler(async (req, res) => {
+  const assessment = await placementReadinessService.createPlacementReadinessAssessment(
+    req.user._id,
+    req.body.careerId
+  );
+  return ApiResponse.success(
+    res,
+    assessment,
+    'Placement readiness assessment created successfully',
+    HTTP_STATUS.CREATED
+  );
+});
+
+export const getLatestPlacementReadinessAssessment = asyncHandler(async (req, res) => {
+  const assessment = await placementReadinessService.getLatestPlacementReadinessAssessment(
+    req.user._id,
+    req.params.careerId
+  );
+  return ApiResponse.success(
+    res,
+    assessment,
+    assessment
+      ? 'Placement readiness assessment retrieved successfully'
+      : 'No placement readiness assessment exists for this career yet'
+  );
+});

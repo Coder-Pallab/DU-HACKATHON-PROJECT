@@ -5,9 +5,11 @@ import {
   LayoutDashboard,
   UserRound,
   FileText,
+  ScanSearch,
   BriefcaseBusiness,
   BookOpen,
   MessageCircle,
+  Target,
   Settings,
   CircleHelp,
   X,
@@ -34,6 +36,11 @@ const navigation = [
         icon: FileText,
       },
       {
+        name: "Resume Intelligence",
+        path: "/dashboard/resume-intelligence",
+        icon: ScanSearch,
+      },
+      {
         name: "Career Matches",
         path: "/dashboard/careers",
         icon: BriefcaseBusiness,
@@ -42,6 +49,11 @@ const navigation = [
         name: "Learning Roadmap",
         path: "/dashboard/roadmap",
         icon: BookOpen,
+      },
+      {
+        name: "Placement Readiness",
+        path: "/dashboard/placement",
+        icon: Target,
       },
       {
         name: "AI Counsellor",

@@ -6,6 +6,8 @@ import {
   BriefcaseBusiness,
   BookOpen,
   UserRound,
+  Target,
+  FileText,
 } from "lucide-react";
 
 const mobileLinks = [
@@ -27,6 +29,18 @@ const mobileLinks = [
     name: "Roadmap",
     path: "/dashboard/roadmap",
     icon: BookOpen,
+  },
+  {
+    nameKey: "sidebar.placementReadiness",
+    name: "Readiness",
+    path: "/dashboard/placement",
+    icon: Target,
+  },
+  {
+    nameKey: "resumeIntelligence.mobile",
+    name: "Resume AI",
+    path: "/dashboard/resume-intelligence",
+    icon: FileText,
   },
   {
     nameKey: "sidebar.myProfile",

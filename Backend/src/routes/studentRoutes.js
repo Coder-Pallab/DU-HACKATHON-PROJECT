@@ -9,6 +9,8 @@ import {
   validateUpdateAcademicDetails,
   validateUpdateInterests,
   validateUpdatePreferences,
+  validatePlacementReadinessRequest,
+  validatePlacementReadinessCareerId,
 } from '../validators/studentValidator.js';
 import {
   validateAddSkill,
@@ -55,6 +57,20 @@ router.patch('/profile', validateUpdateProfile, studentController.updateProfile)
 router.patch('/academic-details', validateUpdateAcademicDetails, studentController.updateAcademicDetails);
 router.patch('/interests', validateUpdateInterests, studentController.updateInterests);
 router.patch('/preferences', validateUpdatePreferences, studentController.updatePreferences);
+
+/**
+ * Placement readiness assessments
+ */
+router.post(
+  '/me/readiness',
+  validatePlacementReadinessRequest,
+  studentController.createPlacementReadinessAssessment
+);
+router.get(
+  '/me/readiness/:careerId',
+  validatePlacementReadinessCareerId,
+  studentController.getLatestPlacementReadinessAssessment
+);
 
 // Specific student lookup by ID (ownership / admin / recruiter checked in service)
 router.get('/:id', validateStudentId, studentController.getStudentById);

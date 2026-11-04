@@ -7,6 +7,20 @@ export const studentService = {
     return getData(await apiClient.get("/students/me"));
   },
 
+  async createPlacementReadinessAssessment(careerId) {
+    return getData(
+      await apiClient.post("/students/me/readiness", { careerId })
+    );
+  },
+
+  async getPlacementReadinessAssessment(careerId) {
+    return getData(
+      await apiClient.get(`/students/me/readiness/${encodeURIComponent(careerId)}`, {
+        suppressErrorToast: true,
+      })
+    );
+  },
+
   async updateProfile(payload) {
     return getData(await apiClient.patch("/students/profile", payload));
   },

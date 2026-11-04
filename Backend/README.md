@@ -39,6 +39,7 @@ Backend/
 │   │   ├── careerCounsellorController.js
 │   │   ├── healthController.js
 │   │   ├── learningRoadmapController.js
+│   │   ├── mockInterviewController.js
 │   │   ├── resumeController.js
 │   │   ├── skillGapController.js
 │   │   └── studentController.js
@@ -55,7 +56,10 @@ Backend/
 │   │   ├── CareerCounsellingConversation.js
 │   │   ├── CareerRecommendation.js
 │   │   ├── LearningRoadmap.js
+│   │   ├── MockInterview.js
+│   │   ├── PlacementReadinessAssessment.js
 │   │   ├── Resume.js
+│   │   ├── ResumeAnalysis.js
 │   │   ├── Skill.js
 │   │   ├── SkillGapAnalysis.js
 │   │   ├── Student.js
@@ -76,6 +80,8 @@ Backend/
 │   │   ├── careerService.js
 │   │   ├── geminiService.js
 │   │   ├── learningRoadmapService.js
+│   │   ├── mockInterviewService.js
+│   │   ├── placementReadinessService.js
 │   │   ├── resumeParserService.js
 │   │   ├── resumeService.js
 │   │   ├── skillGapService.js
@@ -91,6 +97,7 @@ Backend/
 │   │   ├── careerValidator.js
 │   │   ├── careerCounsellorValidator.js
 │   │   ├── learningRoadmapValidator.js
+│   │   ├── mockInterviewValidator.js
 │   │   ├── resumeValidator.js
 │   │   ├── skillGapValidator.js
 │   │   ├── studentValidator.js
@@ -152,6 +159,8 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ### 🎓 Student Profile & Skills (`/api/v1/students`)
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
+| `POST` | `/api/v1/students/me/readiness` | Authenticated | Create a readiness assessment using `{ "careerId": "<career ID or slug>" }` |
+| `GET` | `/api/v1/students/me/readiness/:careerId` | Authenticated | Retrieve the latest assessment for a career |
 | `GET` | `/api/v1/students/me` | Bearer Token | Get current student's full profile |
 | `GET` | `/api/v1/students/:id` | Bearer Token | Get student profile by ID |
 | `POST` | `/api/v1/students/profile` | Bearer Token | Create initial student profile manually |
@@ -179,6 +188,16 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
 Resume text is extracted from the uploaded file before it is sent to Cloudinary and cached in MongoDB. For older Cloudinary resumes without cached text, parsing tries Cloudinary's short-lived authenticated download API when public raw-file delivery is denied. If authenticated download also fails, parsing returns `503` with the provider status; check the Cloudinary credentials and asset.
 
+Resume Intelligence endpoints (student-only):
+- `POST /api/v1/resumes/:id/intelligence/analyze` accepts optional `{ "careerId": "slug-or-id" }` and saves a bilingual evidence-based analysis.
+- `GET /api/v1/resumes/:id/intelligence/analyses` lists up to 50 analyses belonging to the authenticated student and resume.
+- `POST /api/v1/resumes/:id/intelligence/compatibility` accepts exactly one of `{ "careerId": "slug-or-id" }` or `{ "jobDescription": "..." }`.
+- `POST /api/v1/resumes/:id/intelligence/analyses/:analysisId/improvements` generates a reviewable improvement draft from supported kinds and verified resume/profile facts.
+- `PATCH /api/v1/resumes/:id/intelligence/analyses/:analysisId/improvements/:draftId` saves edited draft text or marks it accepted/dismissed.
+
+Scores use a documented five-level rubric; unavailable categories are stored as unknown and omitted from the overall average. Career and job-description keyword coverage is distinct from profile-based suitability and is not an official ATS score. Improvement drafts never overwrite the original resume. Separate improved-PDF export is not included because the backend has no document-generation library.
+Resume reviews and AI improvement drafts try the configured chat model first, then the configured counsellor model and Gemini 3.5 Flash-Lite if the output is unavailable or invalid. The frontend allows up to 100 seconds for these retrying requests.
+
 ### 💼 Career Catalog Endpoints (`/api/v1/careers`)
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
@@ -203,13 +222,28 @@ Resume text is extracted from the uploaded file before it is sent to Cloudinary 
 - `POST /api/v1/ai/roadmaps/generate` (authenticated, rate-limited): Send `{ "careerId": "<MongoDB ObjectId or career slug>" }` to create a roadmap based on your latest saved skill-gap analysis. If none exists, one is generated first.
 - `GET /api/v1/ai/roadmaps/:careerId` (authenticated): Retrieve your latest roadmap for that career.
 - `PATCH /api/v1/ai/roadmaps/:roadmapId/phases/:phaseId` (authenticated): Set a phase `status` to `not_started`, `in_progress`, or `completed`; the roadmap completion percentage and status are recalculated.
-- Roadmap documents are saved in MongoDB, scoped to their owner, and use Gemini for personalization when configured.
+- `PATCH /api/v1/ai/roadmaps/:roadmapId/phases/:phaseId/activities/:activityIndex` (authenticated): Set an individual activity status to `not_started`, `in_progress`, or `completed`. Activity completion drives roadmap progress while existing phase updates remain supported.
+- Roadmap documents are saved in MongoDB, scoped to their owner, and use Gemini for personalization when configured. Resource links come from a curated set of official/reputable learning pages; Gemini may localize descriptions but cannot create or change URLs. Existing roadmaps receive compatible task-progress defaults and supported resources when read.
+
+## Placement Readiness API
+
+- `POST /api/v1/students/me/readiness` (authenticated): Send `{ "careerId": "<MongoDB ObjectId or career slug>" }` to save a snapshot calculated from the student's career skill match, latest analyzed resume, roadmap progress, and completed mock interviews.
+- `GET /api/v1/students/me/readiness/:careerId` (authenticated): Retrieve the latest assessment for the signed-in student and career. If none exists yet, returns HTTP 200 with `data: null`, allowing the UI to show its empty state without treating a first-time lookup as an error.
+- The response includes a weighted score, per-category evidence, strengths, improvement areas, recommendations, language, and a disclaimer. Categories without source data are excluded; when no measurable evidence exists, `overallScore` is `null` and `assessmentStatus` is `insufficient_data`. Explanatory content follows the saved English/Assamese preference.
+
+## AI Mock Interview API
+
+- `POST /api/v1/ai/interviews` (authenticated, rate-limited): Send `{ "careerId": "<MongoDB ObjectId or career slug>" }` to generate and save a five-question interview in the student's saved language.
+- `GET /api/v1/ai/interviews` and `GET /api/v1/ai/interviews/:interviewId` (authenticated): List or retrieve only the signed-in student's interview sessions.
+- `PATCH /api/v1/ai/interviews/:interviewId/questions/:questionId` (authenticated, rate-limited): Submit `{ "answer": "<your answer>" }`. Gemini evaluates the answer and returns a score, feedback, strengths, and improvement suggestions. The interview completes and receives an overall score after all questions are answered.
+- `DELETE /api/v1/ai/interviews/:interviewId` (authenticated): Delete one of the signed-in student's interview sessions.
+- Generation fails with a service-unavailable error if Gemini output is incomplete or does not meet the saved language/JSON contract; no fabricated interview content is persisted.
 
 ## Bilingual Career Counsellor API
 
 - `POST /api/v1/ai/chat/messages` accepts `{ "message": "How can I prepare for data analyst roles?", "language": "English" }`. `language` is optional and defaults to the student's preferred language (English or Assamese). Send a returned `conversationId` on later messages to continue a conversation; supply `language` to switch languages.
 - `GET /api/v1/ai/chat/conversations` lists the authenticated user's saved conversations (`page` and `limit` optional; limit is capped at 50).
 - `GET /api/v1/ai/chat/conversations/:conversationId` retrieves one conversation's complete persisted history and denies access to other users' conversations.
-- Conversations are stored in MongoDB. Replies use Gemini's `generateContent` API with `GEMINI_COUNSELLOR_MODEL` (defaults to the stable `gemini-3.6-flash`; falls back to `GEMINI_CHAT_MODEL` when explicitly configured), a 30-second provider timeout, and a 2,048-token response cap. The counsellor uses up to 10 recent messages (capped at 1,200 characters each) and is instructed to answer follow-up fragments in context with concise, practical guidance. Truncated model responses are rejected rather than saved as complete answers. Provider data handling follows Google's Gemini API terms. If Gemini is unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message. Failed sends remain in the chat input for retry.
+- Conversations are stored in MongoDB. Replies use Gemini's `generateContent` API, trying `GEMINI_COUNSELLOR_MODEL`, then `GEMINI_CHAT_MODEL`, then `gemini-3.5-flash-lite` and `gemini-3.1-flash-lite` if a model returns a rate-limit or temporary-unavailability error (429/503). Model candidates are deduplicated. Requests use a 30-second provider timeout and a 2,048-token response cap. The counsellor uses up to 10 recent messages (capped at 1,200 characters each) and is instructed to answer follow-up fragments in context with concise, practical guidance. Truncated model responses are rejected rather than saved as complete answers. Provider data handling follows Google's Gemini API terms. If all attempted models are unavailable, the endpoint returns a service-unavailable error and does not save an unanswered message. Failed sends remain in the chat input for retry.
 
 The backend only starts after a successful MongoDB connection. If MongoDB disconnects while running, database-backed routes return `503 Service Unavailable` instead of waiting for Mongoose's query-buffer timeout. Check that the MongoDB service is running and `MONGODB_URI` in `Backend/.env` points to a reachable database.

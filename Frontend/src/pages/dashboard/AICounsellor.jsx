@@ -169,7 +169,7 @@ function AICounsellor() {
 
           {isLoadingHistory && messages.length === 0 ? (
             <div className="flex h-105 items-center justify-center text-sm text-slate-500">Loading conversation...</div>
-          ) : messages.length === 0 ? (
+          ) : messages.length === 0 && !isTyping ? (
             <div className="flex h-105 flex-col items-center justify-center px-6 text-center">
               <Sparkles className="mb-3 text-teal-700" size={30} />
               <h3 className="font-semibold text-slate-800">Start a career conversation</h3>

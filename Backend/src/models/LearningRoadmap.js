@@ -54,6 +54,39 @@ const roadmapPhaseSchema = new mongoose.Schema(
         message: 'Each roadmap phase must have 1 to 5 activities of at most 300 characters',
       },
     },
+    activityProgress: {
+      type: [
+        new mongoose.Schema(
+          {
+            activityIndex: { type: Number, required: true, min: 0 },
+            activity: { type: String, required: true, trim: true, maxlength: 300 },
+            status: {
+              type: String,
+              enum: ['not_started', 'in_progress', 'completed'],
+              default: 'not_started',
+            },
+            completedAt: { type: Date, default: null },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
+    resources: {
+      type: [
+        new mongoose.Schema(
+          {
+            key: { type: String, required: true },
+            title: { type: String, required: true, trim: true, maxlength: 160 },
+            provider: { type: String, required: true, trim: true, maxlength: 100 },
+            url: { type: String, required: true, trim: true, maxlength: 500 },
+            description: { type: String, required: true, trim: true, maxlength: 400 },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     status: {
       type: String,
       enum: ['not_started', 'in_progress', 'completed'],

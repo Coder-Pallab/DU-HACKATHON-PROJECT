@@ -107,7 +107,11 @@ apiClient.interceptors.response.use(
     );
 
     if (!isUnauthorized || !originalRequest || isAuthRequest) {
-      if ((!isUnauthorized || isAuthRequest) && !axios.isCancel(error)) {
+      if (
+        (!isUnauthorized || isAuthRequest) &&
+        !error.config?.suppressErrorToast &&
+        !axios.isCancel(error)
+      ) {
         dispatchToast("error", getApiErrorMessage(error));
       }
       return Promise.reject(error);
