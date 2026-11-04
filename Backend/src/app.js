@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 
-import { assertRuntimeConfig, ENV } from './config/env.js';
+import { ENV } from './config/env.js';
 import { connectDB, getDatabaseStatus } from './config/db.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
@@ -11,7 +11,6 @@ import { errorHandler } from './middleware/errorHandler.js';
 import apiRouter from './routes/index.js';
 
 const app = express();
-assertRuntimeConfig();
 let databaseConnectionPromise;
 
 if (process.env.VERCEL) {
@@ -24,7 +23,7 @@ app.use(helmet());
 // Cross-Origin Resource Sharing (CORS)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Postman) or matching CLIENT_URL
+    // Allow requests with no origin or an explicitly configured frontend origin.
     if (!origin || ENV.CLIENT_URLS.includes(origin) || ENV.NODE_ENV === 'development') {
       callback(null, true);
     } else {

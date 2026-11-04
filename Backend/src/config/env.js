@@ -19,6 +19,7 @@ const configuredClientUrls = (process.env.CLIENT_URLS || '')
   .split(',')
   .map((url) => url.trim())
   .filter(Boolean);
+const defaultClientUrls = ['http://localhost:3000', 'https://dishaai-iota.vercel.app'];
 
 /**
  * Validated Environment Configuration
@@ -28,7 +29,11 @@ export const ENV = Object.freeze({
   PORT: parseInt(process.env.PORT, 10) || 5000,
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
   CLIENT_URLS: [
-    ...new Set([process.env.CLIENT_URL || 'http://localhost:3000', ...configuredClientUrls]),
+    ...new Set([
+      ...defaultClientUrls,
+      process.env.CLIENT_URL || 'http://localhost:3000',
+      ...configuredClientUrls,
+    ]),
   ],
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/ai_career_guidance',
   
