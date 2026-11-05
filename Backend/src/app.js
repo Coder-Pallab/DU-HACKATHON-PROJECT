@@ -20,11 +20,27 @@ if (process.env.VERCEL) {
 // Security HTTP headers
 app.use(helmet());
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (ENV.CLIENT_URLS.includes(origin) || ENV.NODE_ENV === 'development') return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname.endsWith('.vercel.app') || hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+};
+
 // Cross-Origin Resource Sharing (CORS)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin or an explicitly configured frontend origin.
-    if (!origin || ENV.CLIENT_URLS.includes(origin) || ENV.NODE_ENV === 'development') {
+    // Allow requests with no origin, configured frontend origins, local hosts, or vercel deployments.
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Cross-Origin Request Blocked by CORS'));

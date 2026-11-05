@@ -47,11 +47,11 @@ export const ENV = Object.freeze({
 
   // Google Gemini API
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
-  GEMINI_CHAT_MODEL: process.env.GEMINI_CHAT_MODEL || 'gemini-3.8-flash',
+  GEMINI_CHAT_MODEL: process.env.GEMINI_CHAT_MODEL || 'gemini-3.1-flash-lite',
   GEMINI_COUNSELLOR_MODEL:
     process.env.GEMINI_COUNSELLOR_MODEL ||
     process.env.GEMINI_CHAT_MODEL ||
-    'gemini-3.6-flash',
+    'gemini-3.1-flash-lite',
 
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',

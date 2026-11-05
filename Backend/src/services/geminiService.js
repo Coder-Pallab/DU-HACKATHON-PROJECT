@@ -116,13 +116,22 @@ export const generateStructuredJSON = async (prompt, systemInstruction = '') => 
     return null; // Signals fallback should be used
   }
 
-  try {
-    return await requestStructuredJSON(prompt, systemInstruction, ENV.GEMINI_CHAT_MODEL);
-  } catch (error) {
-    console.error(`[Gemini AI] Execution error: ${error.message}`);
-    // If quota or API failure occurs, return null to gracefully trigger fallback
-    return null;
+  const modelCandidates = [...new Set([
+    ENV.GEMINI_CHAT_MODEL,
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+  ].filter(Boolean))];
+
+  for (const modelName of modelCandidates) {
+    try {
+      return await requestStructuredJSON(prompt, systemInstruction, modelName);
+    } catch (error) {
+      console.error(`[Gemini AI] Model ${modelName} error: ${error.message}`);
+    }
   }
+
+  return null;
 };
 
 export const generateStructuredJSONWithFallback = async (
@@ -137,7 +146,13 @@ export const generateStructuredJSONWithFallback = async (
     );
   }
 
-  const modelNames = [...new Set([ENV.GEMINI_CHAT_MODEL, ...fallbackModels].filter(Boolean))];
+  const modelNames = [...new Set([
+    ENV.GEMINI_CHAT_MODEL,
+    ...fallbackModels,
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+  ].filter(Boolean))];
   let lastError;
   let lastResponse;
 
