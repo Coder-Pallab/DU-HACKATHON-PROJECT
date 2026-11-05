@@ -11,7 +11,7 @@ A modular, production-ready RESTful backend built with Node.js, Express.js, Mong
 - **Authentication:** JWT (JSON Web Tokens) with Access & Refresh tokens, bcryptjs
 - **AI Integration:** Google Gemini API (`@google/genai` for chat; `@google/generative-ai` for structured generation)
 - **File Uploads & Storage:** Multer, Cloudinary (with local storage fallback)
-- **Document Parsing:** `pdf-parse` with `@napi-rs/canvas` for Node.js compatibility, `mammoth` (DOCX parsing)
+- **Document Parsing:** `pdf-parse` for Node.js PDF text extraction, `mammoth` (DOCX parsing)
 - **Security:** Helmet, CORS, Express-Rate-Limit
 - **Validation:** Express-Validator
 - **Logging:** Morgan

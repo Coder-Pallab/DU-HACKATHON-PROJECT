@@ -1,9 +1,11 @@
 import fs from 'fs';
-import { PDFParse } from 'pdf-parse';
+import { createRequire } from 'node:module';
 import mammoth from 'mammoth';
 import { ENV } from '../config/env.js';
 import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 import { ApiError } from '../utils/apiError.js';
+
+const pdfParse = createRequire(import.meta.url)('pdf-parse');
 
 const readRemoteResponse = async (response) => {
   const contentLength = Number(response.headers.get('content-length'));
@@ -109,13 +111,8 @@ export const extractResumeText = async (resume) => {
   let rawText = '';
 
   if (resume.fileType === 'pdf') {
-    const parser = new PDFParse({ data: buffer });
-    try {
-      const result = await parser.getText();
-      rawText = result.text || '';
-    } finally {
-      await parser.destroy();
-    }
+    const result = await pdfParse(buffer);
+    rawText = result.text || '';
   } else if (resume.fileType === 'docx') {
     const result = await mammoth.extractRawText({ buffer });
     rawText = result.value || '';
