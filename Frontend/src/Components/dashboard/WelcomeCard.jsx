@@ -8,7 +8,7 @@ function WelcomeCard({ name = "there" }) {
   const navigate = useNavigate();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-800 to-teal-600 p-6 text-white md:p-8">
+    <div className="relative overflow-hidden rounded-2xl border border-teal-800 bg-teal-900 p-6 text-white shadow-lg shadow-teal-950/10 md:p-8">
 
       <div className="relative z-10 max-w-xl">
 
@@ -38,9 +38,9 @@ function WelcomeCard({ name = "there" }) {
 
       </div>
 
-      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/10" />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full border border-white/10" />
 
-      <div className="pointer-events-none absolute -bottom-20 right-24 h-48 w-48 rounded-full bg-white/10" />
+      <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full border border-white/10" />
 
     </div>
   );

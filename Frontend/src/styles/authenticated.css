@@ -1,0 +1,65 @@
+.authenticated-app {
+  background: #f6f8fb;
+}
+
+.authenticated-app .app-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.authenticated-app .app-sidebar {
+  box-shadow: 8px 0 24px -24px rgba(15, 23, 42, 0.3);
+}
+
+.authenticated-app main article[class*="border"] {
+  border-color: #e2e8f0;
+  border-radius: 0.95rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.025);
+  transition:
+    border-color 160ms ease,
+    box-shadow 180ms ease;
+}
+
+.authenticated-app main article[class*="border"]:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px -18px rgba(15, 23, 42, 0.22);
+}
+
+.authenticated-app main :is(input, select, textarea) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.authenticated-app main :is(p, li, dd, dt) {
+  overflow-wrap: anywhere;
+}
+
+.authenticated-app main :is(button, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.authenticated-app main :is(button, a):focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.35);
+  outline-offset: 2px;
+}
+
+.authenticated-app main .recharts-responsive-container {
+  min-width: 0 !important;
+}
+
+@media (max-width: 639px) {
+  .authenticated-app main {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
+  .authenticated-app main :is(button, a, select) {
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authenticated-app main article[class*="border"] {
+    transition: none;
+  }
+}

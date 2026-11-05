@@ -1,24 +1,27 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-import DashboardLayout from "../Components/layout/DashboardLayout";
-import Dashboard from "../pages/dashboard/Dashboard";
-import MyProfile from "../pages/dashboard/MyProfile";
-import DashboardSection from "../pages/dashboard/DashboardSection";
-import CareerMatches from "../pages/dashboard/CareerMatches";
-import ResumeSkills from "../pages/dashboard/ResumeSkills";
-import ResumeIntelligence from "../pages/dashboard/ResumeIntelligence";
-import LearningRoadmap from "../pages/dashboard/LearningRoadmap";
-import PlacementReadiness from "../pages/dashboard/Placementreadiness";
-import AICounsellor from "../pages/dashboard/AICounsellor";
-import Settings from "../pages/dashboard/Settings";
-import HelpSupport from "../pages/dashboard/HelpSupport";
-import FeatureUnavailable from "../pages/dashboard/FeatureUnavailable";
-import Login from "../pages/public/Login";
-import Signup from "../pages/public/Signup";
-import ForgotPassword from "../pages/public/ForgotPassword";
-import ResetPassword from "../pages/public/ResetPassword";
 import ProtectedRoute from "./ProtectedRoute";
+
+const DashboardLayout = lazy(() => import("../Components/layout/DashboardLayout"));
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
+const MyProfile = lazy(() => import("../pages/dashboard/MyProfile"));
+const DashboardSection = lazy(() => import("../pages/dashboard/DashboardSection"));
+const CareerMatches = lazy(() => import("../pages/dashboard/CareerMatches"));
+const ResumeSkills = lazy(() => import("../pages/dashboard/ResumeSkills"));
+const ResumeIntelligence = lazy(() => import("../pages/dashboard/ResumeIntelligence"));
+const LearningRoadmap = lazy(() => import("../pages/dashboard/LearningRoadmap"));
+const PlacementReadiness = lazy(() => import("../pages/dashboard/Placementreadiness"));
+const AICounsellor = lazy(() => import("../pages/dashboard/AICounsellor"));
+const Settings = lazy(() => import("../pages/dashboard/Settings"));
+const HelpSupport = lazy(() => import("../pages/dashboard/HelpSupport"));
+const FeatureUnavailable = lazy(() => import("../pages/dashboard/FeatureUnavailable"));
+const Login = lazy(() => import("../pages/public/Login"));
+const Signup = lazy(() => import("../pages/public/Signup"));
+const ForgotPassword = lazy(() => import("../pages/public/ForgotPassword"));
+const ResetPassword = lazy(() => import("../pages/public/ResetPassword"));
+const LandingPage = lazy(() => import("../pages/public/LandingPage"));
 
 function AppRoutes() {
     const { user, isLoading } = useAuth();
@@ -32,10 +35,16 @@ function AppRoutes() {
     }
 
     return (
-        <Routes>
-            <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center text-sm text-slate-600">
+                Loading page...
+            </div>
+        }>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-            <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <Signup />} />
+            <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Signup />} />
+            <Route path="/signup" element={<Navigate to="/register" replace />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding/profile" element={<Navigate to="/dashboard/profile" replace />} />
@@ -60,8 +69,9 @@ function AppRoutes() {
                 <Route path="*" element={<DashboardSection title="Page not found" />} />
             </Route>
 
-            <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          </Routes>
+        </Suspense>
     );
 }
 

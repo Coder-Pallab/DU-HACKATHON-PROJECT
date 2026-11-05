@@ -32,7 +32,7 @@ function PageHeader({
       </div>
 
       {action && (
-        <div className="shrink-0">
+        <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
           {action}
         </div>
       )}

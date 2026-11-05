@@ -12,6 +12,9 @@ import {
   Target,
   Settings,
   CircleHelp,
+  Bookmark,
+  Bell,
+  Briefcase,
   X,
 } from "lucide-react";
 
@@ -92,10 +95,14 @@ function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`fixed bottom-0 left-0 top-[72px] z-50 w-[260px] overflow-y-auto border-r border-slate-200 bg-white p-4 transition-transform duration-300 lg:sticky lg:top-[72px] lg:z-30 lg:block lg:h-[calc(100vh-72px)] lg:translate-x-0 ${
+        aria-label={t("sidebar.navigation", "Navigation")}
+        className={`app-sidebar fixed bottom-0 left-0 top-[72px] z-50 w-[min(84vw,280px)] overflow-y-auto border-r border-slate-200 bg-white p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-transform duration-300 lg:sticky lg:top-[72px] lg:z-30 lg:block lg:h-[calc(100vh-72px)] lg:w-[260px] lg:shrink-0 lg:translate-x-0 lg:border-r-slate-200/80 lg:p-5 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        <p className="mb-5 hidden px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 lg:block">
+          {t("Your workspace", "Your workspace")}
+        </p>
         {/* Mobile Sidebar Header */}
         <div className="mb-5 flex items-center justify-between lg:hidden">
           <h2 className="font-semibold text-slate-800">
@@ -125,15 +132,15 @@ function Sidebar({ isOpen, onClose }) {
                     end={item.end}
                     onClick={onClose}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl border-l-2 px-3 py-3 text-sm font-medium transition ${
+                      `flex min-h-11 items-center gap-3 rounded-xl border-l-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                         isActive
-                          ? "border-teal-700 bg-teal-50 text-teal-800"
-                          : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-teal-700"
+                          ? "border-teal-700 bg-teal-50 text-teal-900"
+                          : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-teal-800"
                       }`
                     }
                   >
-                    <Icon size={19} />
-                    {t(item.name, item.name)}
+                    <Icon size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">{t(item.name, item.name)}</span>
                   </NavLink>
                 );
               })}
