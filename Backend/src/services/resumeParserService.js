@@ -1,9 +1,12 @@
 import fs from 'fs';
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { createRequire } from 'node:module';
 import mammoth from 'mammoth';
 import { ENV } from '../config/env.js';
 import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 import { ApiError } from '../utils/apiError.js';
+
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 
 const readRemoteResponse = async (response) => {
   const contentLength = Number(response.headers.get('content-length'));

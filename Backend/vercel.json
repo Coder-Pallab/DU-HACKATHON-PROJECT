@@ -9,7 +9,7 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "includeFiles": "node_modules/pdf-parse/lib/pdf.js/v1.10.100/build/pdf.js"
+      "includeFiles": "node_modules/pdf-parse/**"
     }
   }
 }
