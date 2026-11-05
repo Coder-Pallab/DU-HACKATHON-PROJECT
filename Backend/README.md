@@ -6,12 +6,12 @@ A modular, production-ready RESTful backend built with Node.js, Express.js, Mong
 
 ## 🛠️ Tech Stack
 
-- **Runtime & Framework:** Node.js (v20+ / v24+), Express.js (v5)
+- **Runtime & Framework:** Node.js (22.x on Vercel), Express.js (v5)
 - **Database:** MongoDB & Mongoose
 - **Authentication:** JWT (JSON Web Tokens) with Access & Refresh tokens, bcryptjs
 - **AI Integration:** Google Gemini API (`@google/genai` for chat; `@google/generative-ai` for structured generation)
 - **File Uploads & Storage:** Multer, Cloudinary (with local storage fallback)
-- **Document Parsing:** `pdf-parse`, `mammoth` (DOCX parsing)
+- **Document Parsing:** `pdf-parse` with `@napi-rs/canvas` for Node.js compatibility, `mammoth` (DOCX parsing)
 - **Security:** Helmet, CORS, Express-Rate-Limit
 - **Validation:** Express-Validator
 - **Logging:** Morgan

@@ -86,6 +86,44 @@ test('resume uploads accept PDF and DOCX but reject legacy DOC files', () => {
   );
 });
 
+test('resume parser extracts PDF text in Node', async () => {
+  const escapedText = 'Resume extraction works'.replace(/[\\()]/g, '\\$&');
+  const stream = `BT\n/F1 12 Tf\n72 720 Td\n(${escapedText}) Tj\nET`;
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
+  ];
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for (const [index, object] of objects.entries()) {
+    offsets.push(Buffer.byteLength(pdf));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  }
+
+  const xrefOffset = Buffer.byteLength(pdf);
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  pdf += offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('');
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(Buffer.from(pdf));
+
+  try {
+    const text = await extractResumeText({
+      fileType: 'pdf',
+      localFilePath: '',
+      fileUrl: 'https://storage.example/resume.pdf',
+    });
+    assert.match(text, /Resume extraction works/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('resume parser falls back to Cloudinary authenticated download after delivery denial', async () => {
   const resumeUrl = 'https://res.cloudinary.com/example/raw/upload/private-resume.pdf';
   const originalFetch = globalThis.fetch;

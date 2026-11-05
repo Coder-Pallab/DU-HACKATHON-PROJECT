@@ -4,6 +4,9 @@
   "description": "Production-ready backend for AI-powered career guidance and placement assistance platform",
   "type": "module",
   "main": "src/server.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
@@ -12,6 +15,7 @@
   "dependencies": {
     "@google/genai": "^2.32.0",
     "@google/generative-ai": "^0.24.1",
+    "@napi-rs/canvas": "0.1.80",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "cors": "^2.8.6",

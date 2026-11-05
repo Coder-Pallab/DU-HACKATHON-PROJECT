@@ -110,9 +110,12 @@ export const extractResumeText = async (resume) => {
 
   if (resume.fileType === 'pdf') {
     const parser = new PDFParse({ data: buffer });
-    const result = await parser.getText();
-    rawText = result.text || '';
-    await parser.destroy?.();
+    try {
+      const result = await parser.getText();
+      rawText = result.text || '';
+    } finally {
+      await parser.destroy();
+    }
   } else if (resume.fileType === 'docx') {
     const result = await mammoth.extractRawText({ buffer });
     rawText = result.value || '';
